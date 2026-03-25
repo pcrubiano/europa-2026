@@ -394,8 +394,10 @@ async function handleLogin(e){
   const u=document.getElementById('loginUser').value.toLowerCase().trim(),p=document.getElementById('loginPass').value;
   const h=await sha256(u+':'+p);
   if(_USERS.includes(h)){
-    _fails=0;sessionStorage.setItem('eu26_auth','1');sessionStorage.setItem('eu26_last',Date.now().toString());
+    _fails=0;localStorage.setItem('eu26_auth','1');localStorage.setItem('eu26_last',Date.now().toString());
     document.getElementById('loginOverlay').classList.add('hidden');document.body.style.overflow='';
+    // Store credential in browser password manager for autofill
+    if(window.PasswordCredential){try{await navigator.credentials.store(new PasswordCredential({id:u,password:p}))}catch(ex){}}
     offerBiometric(u);return false;
   }
   _fails++;
@@ -404,18 +406,18 @@ async function handleLogin(e){
   document.getElementById('loginPass').value='';document.getElementById('loginPass').focus();return false;
 }
 (function(){
-  const auth=sessionStorage.getItem('eu26_auth'),last=parseInt(sessionStorage.getItem('eu26_last')||'0');
+  const auth=localStorage.getItem('eu26_auth'),last=parseInt(localStorage.getItem('eu26_last')||'0');
   if(auth==='1'&&(Date.now()-last)<SESSION_TIMEOUT){
     document.getElementById('loginOverlay').classList.add('hidden');
   }else{
-    sessionStorage.removeItem('eu26_auth');document.body.style.overflow='hidden';
+    localStorage.removeItem('eu26_auth');document.body.style.overflow='hidden';
     setTimeout(()=>document.getElementById('loginUser').focus(),100);
   }
 })();
 // Keep session alive on interaction
-document.addEventListener('click',()=>{if(sessionStorage.getItem('eu26_auth')==='1')sessionStorage.setItem('eu26_last',Date.now().toString())});
+document.addEventListener('click',()=>{if(localStorage.getItem('eu26_auth')==='1')localStorage.setItem('eu26_last',Date.now().toString())});
 // Check session timeout periodically
-setInterval(()=>{const last=parseInt(sessionStorage.getItem('eu26_last')||'0');if(sessionStorage.getItem('eu26_auth')==='1'&&(Date.now()-last)>=SESSION_TIMEOUT){sessionStorage.removeItem('eu26_auth');location.reload()}},60000);
+setInterval(()=>{const last=parseInt(localStorage.getItem('eu26_last')||'0');if(localStorage.getItem('eu26_auth')==='1'&&(Date.now()-last)>=SESSION_TIMEOUT){localStorage.removeItem('eu26_auth');location.reload()}},60000);
 
 // ── WEBAUTHN BIOMETRIC ──
 let _waUser='';
@@ -423,7 +425,7 @@ const WA=window.PublicKeyCredential!==undefined;
 function b64enc(buf){return btoa(String.fromCharCode(...new Uint8Array(buf)))}
 function b64dec(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
 
-// Show biometric button on login if credential exists
+// Show biometric button + auto-trigger on load if credential exists
 (function(){
   if(!WA)return;
   const u=localStorage.getItem('wa_user');
@@ -431,6 +433,11 @@ function b64dec(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
   const btn=document.getElementById('bioBtn'),sep=document.getElementById('bioSep');
   if(btn){btn.style.display='block';btn.textContent='Usar huella / Face ID ('+u.split('@')[0]+')'}
   if(sep)sep.style.display='block';
+  // Auto-trigger biometric if session expired (need re-auth)
+  const auth=localStorage.getItem('eu26_auth'),last=parseInt(localStorage.getItem('eu26_last')||'0');
+  if(!(auth==='1'&&(Date.now()-last)<SESSION_TIMEOUT)){
+    setTimeout(()=>tryBiometric(),400);
+  }
 })();
 
 async function tryBiometric(){
@@ -443,7 +450,7 @@ async function tryBiometric(){
       allowCredentials:[{type:'public-key',id:b64dec(cid)}],
       userVerification:'required',timeout:60000
     }});
-    sessionStorage.setItem('eu26_auth','1');sessionStorage.setItem('eu26_last',Date.now().toString());
+    localStorage.setItem('eu26_auth','1');localStorage.setItem('eu26_last',Date.now().toString());
     document.getElementById('loginOverlay').classList.add('hidden');document.body.style.overflow='';
   }catch(e){document.getElementById('loginError').textContent='Biometría cancelada o no disponible'}
 }
