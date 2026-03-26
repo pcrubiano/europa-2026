@@ -87,13 +87,44 @@ main{max-width:500px;margin:0 auto;padding:0 0 80px}
 .hdr-si-inp::placeholder{color:var(--tx3);opacity:1;transition:opacity .3s}
 .hdr-kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);font-size:10px;font-weight:600;color:var(--tx3);background:var(--surf);border:1px solid var(--brd2);border-radius:4px;padding:1px 5px;pointer-events:none;line-height:1.5;opacity:.7;transition:opacity .2s}
 .hdr-si-inp:focus~.hdr-kbd{opacity:0}
-.hdr-si-inp:focus{border-color:var(--accent);background:var(--surf);box-shadow:0 0 0 3px var(--accent-s)}
+.hdr-si-inp:focus{border-color:var(--accent);background:var(--surf);box-shadow:0 0 0 3px var(--accent-s),inset 0 1px 2px rgba(0,0,0,.04)}
 .hdr-si-drop{position:fixed;top:48px;left:8px;right:8px;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--r-md);box-shadow:0 8px 24px rgba(0,0,0,.2);max-height:min(200px,38vh);overflow-y:auto;z-index:var(--z-dropdown);-webkit-overflow-scrolling:touch;opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .15s,transform .15s cubic-bezier(.32,1.25,.32,1)}
 .hdr-si-drop.open{opacity:1;transform:translateY(0);pointer-events:auto}
 .hdr-si-drop .search-item{padding:7px 12px;cursor:pointer;border-bottom:1px solid var(--brd)}.hdr-si-drop .search-item:last-child{border-bottom:none}
 .hdr-si-drop .search-item:hover,.hdr-si-drop .search-item:active{background:var(--surf2)}
 .hdr-si-drop .search-item-title{font-size:12px;font-weight:600;color:var(--tx1);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hdr-si-drop .search-item-ctx{font-size:10px;color:var(--tx3);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ── CRAFT: Noise grain overlay (dark mode) ── */
+body.dark::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.03;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:overlay}
+/* ── CRAFT: Hover lift (desktop) ── */
+@media(hover:hover){.day:hover{transform:translateY(-1px);box-shadow:var(--sh-lg);transition:transform .2s,box-shadow .2s}.hl-card:hover{transform:translateY(-2px);box-shadow:var(--sh-md);transition:transform .15s,box-shadow .15s}.doc-item:hover{transform:translateY(-1px);box-shadow:var(--sh);transition:transform .15s,box-shadow .15s,background .15s}.accom-link:hover{opacity:.8}.accom-addr a:hover{text-decoration-color:var(--accent)}}
+/* ── CRAFT: Arrow animation on hover ── */
+.hl-card::after,.doc-item::after{transition:transform .15s}
+@media(hover:hover){.hl-card:hover::after,.doc-item:hover::after{transform:translateX(3px)}.tl-reserva:hover,.accom-link:hover,.pend-link:hover{letter-spacing:.01em}}
+/* ── CRAFT: Gradient hero title ── */
+.hero-title{background:linear-gradient(180deg,var(--tx1) 40%,var(--tx2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+/* ── CRAFT: Animated gradient border on today card ── */
+.day-today{border-color:transparent!important;background-image:linear-gradient(var(--surf),var(--surf)),linear-gradient(var(--glow-angle,0deg),var(--accent),#ff8c42,var(--accent));background-origin:border-box;background-clip:padding-box,border-box;animation:glowRotate 4s linear infinite}
+@keyframes glowRotate{to{--glow-angle:360deg}}
+@property --glow-angle{syntax:'<angle>';initial-value:0deg;inherits:false}
+/* ── CRAFT: Inner content fade on expand ── */
+.day-inner{opacity:0;transform:translateY(4px);transition:opacity .25s .1s,transform .25s .1s}
+.day.open .day-inner{opacity:1;transform:translateY(0)}
+/* ── CRAFT: Glassmorphism on now-card ── */
+.now-card{background:rgba(255,255,255,.75);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px)}body.dark .now-card{background:rgba(28,28,28,.75)}
+/* ── CRAFT: Dark mode top highlight on surfaces ── */
+body.dark .day,body.dark .accom,body.dark .pending,body.dark .docs{border-top:1px solid rgba(255,255,255,.04)}
+/* ── CRAFT: Inset shadow on search input ── */
+.hdr-si-inp{box-shadow:inset 0 1px 2px rgba(0,0,0,.06)}body.dark .hdr-si-inp{box-shadow:inset 0 1px 3px rgba(0,0,0,.2)}
+/* ── CRAFT: Scroll dots for hl-wrap ── */
+.hl-dots{display:flex;justify-content:center;gap:4px;padding:8px 0 2px}.hl-dot{width:5px;height:5px;border-radius:50%;background:var(--brd2);transition:background .2s,transform .2s}.hl-dot.active{background:var(--tx2);transform:scale(1.3)}
+/* ── CRAFT: Theme toggle spin ── */
+.theme-btn span{display:inline-block;transition:transform .35s cubic-bezier(.32,1.25,.32,1)}
+.theme-btn:active span{transform:rotate(360deg)}
+/* ── CRAFT: Route active city highlight ── */
+.route-stop.route-active{transform:scale(1.15)}.route-stop.route-active .route-flag{filter:drop-shadow(0 0 4px var(--accent))}.route-stop.route-active .route-city{color:var(--accent);font-weight:700}
+/* ── CRAFT: Placeholder crossfade ── */
+.hdr-si-inp.ph-fade{opacity:.6;transition:opacity .15s}
 ::selection{background:var(--accent);color:#fff}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
 input:focus-visible{outline-offset:0}
@@ -1023,6 +1054,112 @@ document.addEventListener('DOMContentLoaded',function(){
 
 // ── TIER 4: NOW-CARD AUTO-REFRESH ──
 setInterval(()=>{if(typeof initNowCard==='function')initNowCard()},30*60000);
+
+// ── CRAFT: COUNT-UP ANIMATION ON HERO STATS ──
+(function(){
+  const mq=matchMedia('(prefers-reduced-motion:reduce)');if(mq.matches)return;
+  function countUp(el,target,suffix=''){
+    let current=0;const step=Math.max(1,Math.ceil(target/30));
+    const timer=setInterval(()=>{current=Math.min(current+step,target);el.textContent=current+suffix;if(current>=target)clearInterval(timer)},30);
+  }
+  const hero=document.querySelector('.hero-stats');if(!hero)return;
+  const obs=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){
+    const text=hero.textContent;
+    const nums=text.match(/(\d+)\s*(ciudades|días|noches|vuelos|trenes)/g);
+    if(nums){nums.forEach(m=>{
+      const match=m.match(/(\d+)\s*(.*)/);if(!match)return;
+      const span=document.createElement('span');span.textContent='0 '+match[2];
+      hero.innerHTML=hero.innerHTML.replace(m,span.outerHTML);
+      countUp(span,parseInt(match[1]),match[2]?' '+match[2]:'');
+    })}
+    obs.disconnect();
+  }})},{threshold:.5});
+  document.addEventListener('DOMContentLoaded',()=>obs.observe(hero));
+})();
+
+// ── CRAFT: PLACEHOLDER CROSSFADE ──
+(function(){
+  const inp=document.getElementById('hdrSearch');if(!inp)return;
+  const origSet=inp.setAttribute.bind(inp);
+  inp.setAttribute=function(k,v){
+    if(k==='placeholder'&&v!==inp.placeholder){
+      inp.classList.add('ph-fade');
+      setTimeout(()=>{origSet(k,v);inp.classList.remove('ph-fade')},150);
+    }else{origSet(k,v)}
+  };
+})();
+
+// ── CRAFT: ROUTE ACTIVE CITY DURING TRIP ──
+(function(){
+  const CITY_MAP={'Bruselas':'Bruselas','Brujas':'Brujas','Ámsterdam':'Ámsterdam','Berlín':'Berlín','Praga':'Praga','Viena':'Viena','Budapest':'Budapest','Madrid':'Madrid'};
+  function highlightRoute(){
+    const now=new Date();const ds=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+    const ctx=typeof TRIP_CTX!=='undefined'?TRIP_CTX[ds]:null;if(!ctx)return;
+    const cityName=ctx.city.replace(/🇧🇪|🇳🇱|🇩🇪|🇨🇿|🇦🇹|🇭🇺|🇪🇸|🇦🇷|→/g,'').trim().split(' ')[0];
+    document.querySelectorAll('.route-stop').forEach(s=>{
+      const label=s.querySelector('.route-city');if(!label)return;
+      if(label.textContent.trim()===cityName||label.textContent.trim().startsWith(cityName)){
+        s.classList.add('route-active');
+      }
+    });
+  }
+  document.addEventListener('DOMContentLoaded',highlightRoute);
+})();
+
+// ── CRAFT: CONFETTI ON ALL CHECKLIST COMPLETE ──
+(function(){
+  let confettiFired=false;
+  const origRender2=window.renderPendState;
+  window.renderPendState=function(){
+    origRender2();
+    const total=document.querySelectorAll('.pend-item').length;
+    const done=document.querySelectorAll('.pend-item.done').length;
+    if(done>=total&&total>0&&!confettiFired){
+      confettiFired=true;
+      const mq=matchMedia('(prefers-reduced-motion:reduce)');if(mq.matches)return;
+      const c=document.createElement('canvas');c.style.cssText='position:fixed;inset:0;z-index:9998;pointer-events:none';
+      document.body.appendChild(c);const ctx=c.getContext('2d');c.width=innerWidth;c.height=innerHeight;
+      const particles=[];const colors=['#FF385C','#ff8c42','#059669','#3b82f6','#d97706','#8b5cf6'];
+      for(let i=0;i<80;i++)particles.push({x:innerWidth/2,y:innerHeight/2,vx:(Math.random()-.5)*12,vy:Math.random()*-14-4,size:Math.random()*6+3,color:colors[Math.floor(Math.random()*colors.length)],life:1,rot:Math.random()*360});
+      let frame=0;
+      function draw(){ctx.clearRect(0,0,c.width,c.height);let alive=false;
+        particles.forEach(p=>{p.x+=p.vx;p.vy+=.25;p.y+=p.vy;p.life-=.012;p.rot+=p.vx;
+          if(p.life>0){alive=true;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot*Math.PI/180);ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.fillRect(-p.size/2,-p.size/2,p.size,p.size*0.6);ctx.restore()}
+        });
+        if(alive&&frame<120){frame++;requestAnimationFrame(draw)}else{c.remove()}
+      }
+      requestAnimationFrame(draw);
+    }
+    if(done<total)confettiFired=false;
+  };
+})();
+
+// ── CRAFT: THEME TOGGLE ICON SPIN ──
+(function(){
+  const origToggle2=window.toggleTheme;
+  window.toggleTheme=function(){
+    const icon=document.getElementById('themeIcon');
+    if(icon){icon.style.transform='rotate(360deg)';setTimeout(()=>{icon.style.transform=''},400)}
+    origToggle2();
+  };
+})();
+
+// ── CRAFT: SCROLL DOTS FOR HL-WRAP CAROUSELS ──
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('.hl-wrap').forEach(wrap=>{
+    const track=wrap.querySelector('.hl-track');if(!track)return;
+    const cards=track.querySelectorAll('.hl-card');if(cards.length<=2)return;
+    const dots=document.createElement('div');dots.className='hl-dots';
+    cards.forEach((_,i)=>{const d=document.createElement('span');d.className='hl-dot'+(i===0?' active':'');dots.appendChild(d)});
+    wrap.parentElement.insertBefore(dots,wrap.nextSibling);
+    const dotEls=dots.querySelectorAll('.hl-dot');
+    wrap.addEventListener('scroll',()=>{
+      const scrollLeft=wrap.scrollLeft;const cardW=cards[0].offsetWidth+10;
+      const activeIdx=Math.round(scrollLeft/cardW);
+      dotEls.forEach((d,i)=>d.classList.toggle('active',i===activeIdx));
+    },{passive:true});
+  });
+});
 
 // ── TIER 4: SUBTLE PARALLAX ON HERO ──
 (function(){
