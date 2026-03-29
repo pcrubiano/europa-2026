@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Prototipo A · City-First — Europa 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--bg2:#fafafa;--surf:#fff;--surf2:#f3f4f6;--tx1:#1a1a1a;--tx2:#6b7280;--tx3:#9ca3af;--brd:#f0f0f0;--brd2:#e5e7eb;--accent:#FF385C;--accent-s:rgba(255,56,92,.08);--ok:#059669;--ok-s:rgba(5,150,105,.06);--warn:#d97706;--warn-s:rgba(217,119,6,.06);--font:'Inter',system-ui,sans-serif;--r:12px;--r-sm:8px;--r-pill:100px}
+body.dark{--bg:#0f0f0f;--bg2:#141414;--surf:#1a1a1a;--surf2:#232323;--tx1:#f5f5f5;--tx2:#9ca3af;--tx3:#6b6b6b;--brd:#232323;--brd2:#2e2e2e;--accent-s:rgba(255,56,92,.12);--ok-s:rgba(5,150,105,.12);--warn-s:rgba(217,119,6,.12)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg2);color:var(--tx1);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;font-feature-settings:'cv01' 1,'cv02' 1}
+::selection{background:var(--accent);color:#fff}
+
+/* ── PROTOTYPE BANNER ── */
+.proto-banner{background:var(--accent);color:#fff;text-align:center;padding:10px 16px;font-size:13px;font-weight:600;letter-spacing:.02em;position:sticky;top:0;z-index:100}
+.proto-banner span{opacity:.7;font-weight:400}
+
+/* ── HEADER ── */
+.hdr{padding:20px 16px 12px;max-width:540px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.hdr-title{font-size:20px;font-weight:700;letter-spacing:-.03em}
+.hdr-sub{font-size:12px;color:var(--tx2);margin-top:2px}
+.hdr-right{display:flex;gap:8px}
+.hdr-btn{padding:6px 14px;border-radius:var(--r-pill);font-size:12px;font-weight:600;border:1px solid var(--brd2);background:var(--surf);color:var(--tx2);cursor:pointer}
+.hdr-btn.active{background:var(--tx1);color:var(--bg);border-color:var(--tx1)}
+
+/* ── ROUTE DIAGRAM ── */
+.route-bar{max-width:540px;margin:0 auto;padding:8px 16px 16px;overflow-x:auto;scrollbar-width:none}
+.route-bar::-webkit-scrollbar{display:none}
+.route{display:flex;align-items:center;gap:0;width:max-content}
+.route-stop{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 6px;min-width:44px;transition:.2s}
+.route-stop.current{transform:scale(1.15)}
+.route-stop.current .r-flag{filter:drop-shadow(0 0 6px var(--accent))}
+.route-stop.current .r-city{color:var(--accent);font-weight:700}
+.route-stop.past .r-flag{opacity:.4}
+.route-stop.past .r-city{opacity:.4}
+.r-flag{font-size:18px}
+.r-city{font-size:9px;font-weight:600;white-space:nowrap}
+.r-nights{font-size:8px;color:var(--tx3)}
+.route-line{display:flex;align-items:center;gap:2px;padding:0 2px;color:var(--tx3);font-size:9px}
+.route-line::before,.route-line::after{content:'';width:8px;border-top:1.5px dashed var(--brd2)}
+
+/* ── CITY NAV ── */
+.cnav{max-width:540px;margin:0 auto;padding:0 16px 12px;display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
+.cnav::-webkit-scrollbar{display:none}
+.cnav a{padding:7px 16px;border-radius:var(--r-pill);font-size:13px;font-weight:600;text-decoration:none;white-space:nowrap;color:var(--tx2);background:var(--surf2);transition:.15s;flex-shrink:0}
+.cnav a:active{transform:scale(.96)}
+.cnav a.active{background:var(--tx1);color:var(--bg)}
+
+/* ── MAIN CONTAINER ── */
+main{max-width:540px;margin:0 auto;padding:0 12px 80px}
+
+/* ── EN RUTA (flights) ── */
+.enruta{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.enruta-title{font-size:14px;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.enruta-title .tag{font-size:10px;font-weight:600;padding:2px 8px;border-radius:var(--r-pill);background:var(--surf2);color:var(--tx2)}
+.enruta-leg{padding:8px 0;border-bottom:1px solid var(--brd);font-size:13px;color:var(--tx2)}
+.enruta-leg:last-child{border-bottom:none;padding-bottom:0}
+.enruta-leg b{color:var(--tx1)}
+.enruta-leg .time{font-weight:700;color:var(--tx1);font-variant-numeric:tabular-nums}
+
+/* ── CITY BLOCK ── */
+.city-block{margin-bottom:20px;border-radius:var(--r);overflow:hidden;border:1px solid var(--brd);background:var(--surf)}
+
+.city-header{padding:20px 16px 16px;border-bottom:1px solid var(--brd);position:relative}
+.city-header h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+.city-header h2 span{font-weight:400;color:var(--tx2);font-size:15px}
+.city-dates{font-size:13px;color:var(--tx2);margin-top:4px}
+.city-meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.city-meta .chip{padding:3px 10px;border-radius:var(--r-pill);font-size:11px;font-weight:500;background:var(--surf2);color:var(--tx2)}
+
+/* ── CITY SECTIONS (accordion-like) ── */
+.city-section{border-bottom:1px solid var(--brd)}
+.city-section:last-child{border-bottom:none}
+.cs-head{padding:12px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+.cs-head:active{background:var(--surf2)}
+.cs-icon{font-size:14px;width:28px;height:28px;border-radius:var(--r-sm);background:var(--surf2);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cs-icon.arrive{background:var(--ok-s);color:var(--ok)}
+.cs-icon.depart{background:var(--warn-s);color:var(--warn)}
+.cs-icon.stay{background:rgba(59,130,246,.08);color:#3b82f6}
+.cs-icon.eat{background:rgba(249,115,22,.08);color:#f97316}
+.cs-icon.tip{background:rgba(168,85,247,.08);color:#8b5cf6}
+.cs-title{flex:1;font-size:14px;font-weight:600}
+.cs-subtitle{font-size:12px;color:var(--tx2);font-weight:400}
+.cs-chev{color:var(--tx3);font-size:10px;transition:transform .3s}
+.cs-body{padding:0 16px 14px}
+.cs-body p{font-size:13px;color:var(--tx2);line-height:1.55;margin-bottom:6px}
+.cs-body .detail{font-size:12px;color:var(--tx3);margin-top:2px}
+.cs-body .warn{font-size:12px;color:var(--warn);font-weight:600;margin-top:6px;padding:6px 10px;background:var(--warn-s);border-radius:var(--r-sm);border:1px solid rgba(217,119,6,.15)}
+.cs-body .crit{font-size:12px;color:var(--accent);font-weight:600;margin-top:6px;padding:6px 10px;background:var(--accent-s);border-radius:var(--r-sm);border:1px solid rgba(255,56,92,.15)}
+
+/* ── DAY CARD (inside city) ── */
+.day-card{margin:0 16px 10px;border-radius:var(--r-sm);border:1px solid var(--brd);background:var(--bg2);overflow:hidden}
+.day-card-head{padding:10px 12px;display:flex;align-items:center;gap:8px;cursor:pointer;user-select:none}
+.day-card-head:active{background:var(--surf2)}
+.dc-num{font-size:11px;font-weight:700;color:var(--tx3);min-width:40px}
+.dc-title{font-size:13px;font-weight:600;flex:1}
+.dc-badge{font-size:9px;font-weight:700;padding:2px 8px;border-radius:var(--r-pill);text-transform:uppercase}
+.dc-badge.daytrip{background:rgba(59,130,246,.1);color:#3b82f6;border:1px solid rgba(59,130,246,.15)}
+.dc-badge.transfer{background:var(--warn-s);color:var(--warn);border:1px solid rgba(217,119,6,.15)}
+.dc-badge.halfday{background:var(--accent-s);color:var(--accent);border:1px solid rgba(255,56,92,.15)}
+.day-card-body{padding:0 12px 12px;border-top:1px solid var(--brd)}
+
+/* ── HIGHLIGHT CARDS ── */
+.hl-scroll{overflow-x:auto;scrollbar-width:none;margin:8px -12px 0;padding:0 12px 4px;scroll-snap-type:x mandatory;-webkit-mask-image:linear-gradient(to right,transparent,black 12px,black calc(100% - 12px),transparent);mask-image:linear-gradient(to right,transparent,black 12px,black calc(100% - 12px),transparent)}
+.hl-scroll::-webkit-scrollbar{display:none}
+.hl-track{display:flex;gap:8px;width:max-content}
+.hl-card{flex:0 0 180px;padding:10px 12px;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r-sm);scroll-snap-align:start}
+.hl-card .name{font-size:12px;font-weight:600}
+.hl-card .desc{font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hl-card .foot{font-size:10px;color:var(--tx3);margin-top:6px}
+
+/* ── TIMELINE ── */
+.tl{position:relative;padding-left:20px;margin:8px 0}
+.tl::before{content:'';position:absolute;left:4px;top:8px;bottom:8px;width:2px;background:var(--brd2);border-radius:1px}
+.tl-item{position:relative;padding:6px 0}
+.tl-item::before{content:'';position:absolute;left:-20px;top:10px;width:10px;height:10px;border-radius:50%;border:2px solid var(--brd2);background:var(--bg)}
+.tl-item.end::before{background:var(--tx3);border-color:var(--tx3)}
+.tl-time{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.tl-place{font-size:12px;color:var(--tx2)}
+.tl-leg{padding:4px 0;font-size:12px;color:var(--tx2);display:flex;align-items:center;gap:6px}
+.tl-leg .status{margin-left:auto;font-size:11px;font-weight:600}
+.tl-leg .confirmed{color:var(--ok)}
+.tl-leg .pending{color:var(--warn)}
+
+/* ── ACCOMMODATION ── */
+.accom-card{padding:12px;background:var(--bg2);border-radius:var(--r-sm);border:1px solid var(--brd);margin-top:2px}
+.accom-card .name{font-size:14px;font-weight:700}
+.accom-card .addr{font-size:12px;color:var(--tx3);margin-top:3px}
+.accom-card .times{font-size:12px;color:var(--tx2);margin-top:6px;padding-top:6px;border-top:1px solid var(--brd);line-height:1.6}
+.accom-card .paid{font-size:12px;font-weight:600;color:var(--ok);margin-top:4px}
+.accom-card .unpaid{font-size:12px;font-weight:600;color:var(--warn);margin-top:4px}
+
+/* ── EAT/TIPS LIST ── */
+.eat-list,.tip-list{list-style:none;padding:0;margin:4px 0 0}
+.eat-list li,.tip-list li{font-size:13px;color:var(--tx2);padding:4px 0;display:flex;align-items:baseline;gap:6px}
+.eat-list li::before{content:'🍽️';font-size:11px}
+.tip-list li::before{content:'💡';font-size:11px}
+.eat-list b,.tip-list b{color:var(--tx1);font-weight:600}
+
+/* ── ANNOTATION BAR ── */
+.anno{margin:16px 12px;padding:14px 16px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.12);border-radius:var(--r);font-size:13px;color:#3b82f6;line-height:1.5}
+body.dark .anno{background:rgba(59,130,246,.1)}
+.anno b{font-weight:700}
+.anno-how{font-size:11px;color:var(--tx3);margin-top:6px;font-style:italic}
+
+/* ── THEME ── */
+.theme-btn{position:fixed;bottom:16px;right:16px;width:44px;height:44px;border-radius:50%;background:var(--surf);border:1px solid var(--brd);box-shadow:0 4px 12px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;z-index:50}
+</style>
+</head>
+<body>
+
+<div class="proto-banner">
+  PROTOTIPO A · City-First <span>— La ciudad contiene todo: llegar, explorar, irse</span>
+</div>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">Ciudades imperiales</div>
+    <div class="hdr-sub">8 ciudades · 22 días · 13 may – 3 jun 2026</div>
+  </div>
+</div>
+
+<div class="route-bar"><div class="route">
+  <div class="route-stop past"><span class="r-flag">🇦🇷</span><span class="r-city">BsAs</span></div>
+  <div class="route-line">✈</div>
+  <div class="route-stop past"><span class="r-flag">🇪🇸</span><span class="r-city">Madrid</span></div>
+  <div class="route-line">✈</div>
+  <div class="route-stop current"><span class="r-flag">🇧🇪</span><span class="r-city">Bruselas</span><span class="r-nights">3n</span></div>
+  <div class="route-line">🚂</div>
+  <div class="route-stop"><span class="r-flag">🇳🇱</span><span class="r-city">Ámsterdam</span><span class="r-nights">2n</span></div>
+  <div class="route-line">🚂</div>
+  <div class="route-stop"><span class="r-flag">🇩🇪</span><span class="r-city">Berlín</span><span class="r-nights">4n</span></div>
+  <div class="route-line">🚂</div>
+  <div class="route-stop"><span class="r-flag">🇨🇿</span><span class="r-city">Praga</span><span class="r-nights">3n</span></div>
+  <div class="route-line">🚂</div>
+  <div class="route-stop"><span class="r-flag">🇦🇹</span><span class="r-city">Viena</span><span class="r-nights">3n</span></div>
+  <div class="route-line">🚂</div>
+  <div class="route-stop"><span class="r-flag">🇭🇺</span><span class="r-city">Budapest</span><span class="r-nights">4n</span></div>
+  <div class="route-line">✈</div>
+  <div class="route-stop"><span class="r-flag">🇪🇸</span><span class="r-city">Madrid</span><span class="r-nights">1n</span></div>
+  <div class="route-line">✈</div>
+  <div class="route-stop"><span class="r-flag">🇦🇷</span><span class="r-city">BsAs</span></div>
+</div></div>
+
+<nav class="cnav">
+  <a href="#enruta" class="active">✈ En ruta</a>
+  <a href="#brussels">🇧🇪 Bruselas</a>
+  <a href="#amsterdam">🇳🇱 Ámsterdam</a>
+  <a href="#berlin">🇩🇪 Berlín</a>
+  <a href="#more">+4 ciudades</a>
+</nav>
+
+<main>
+
+<!-- ━━━ ANNOTATION: How this model solves the problem ━━━ -->
+<div class="anno" id="enruta">
+  <b>✦ Modelo City-First:</b> La ciudad es el contenedor principal. Todo lo que necesitás está DENTRO de esa ciudad: cómo llegar, dónde dormir, qué hacer cada día, dónde comer, cómo irte. Brujas es un sub-día de Bruselas, no una ciudad separada. Los vuelos intercontinentales van en "En ruta".
+  <div class="anno-how">BP1: "Where am I?" siempre visible · BP3: Traslados como transiciones · BP6: Day trips como sub-días</div>
+</div>
+
+<!-- ━━━ EN RUTA (vuelos intercontinentales) ━━━ -->
+<div class="enruta">
+  <div class="enruta-title">✈️ En ruta a Europa <span class="tag">13–14 mayo</span></div>
+  <div class="enruta-leg">
+    <span class="time">Mi 13 · 21:40</span> — Vuelo <b>BA → Madrid</b> · Iberia IB6841 · 11h50
+    <div class="detail">Reservó Luisina · Confirmado · $1.800</div>
+  </div>
+  <div class="enruta-leg">
+    <span class="time">Ju 14 · 14:30</span> — Llegada Madrid T4S · <b>Espera 5h40</b> en Barajas
+    <div class="detail">Buscar VIP o zona de juegos para Milo</div>
+  </div>
+  <div class="enruta-leg">
+    <span class="time">Ju 14 · 20:10</span> — Vuelo <b>Madrid → Bruselas</b> · Iberia IB0603 · 2h20
+    <div class="detail">Confirmado · $513 · Llega 22:30 a Zaventem</div>
+  </div>
+</div>
+
+<!-- ━━━ BRUSELAS ━━━ -->
+<div class="city-block" id="brussels">
+  <div class="city-header">
+    <h2>🇧🇪 Bruselas <span>Bélgica</span></h2>
+    <div class="city-dates">3 noches · Jue 14 → Dom 17 mayo</div>
+    <div class="city-meta">
+      <span class="chip">💶 Euro</span>
+      <span class="chip">🌡 15–20°C</span>
+      <span class="chip">🗣 Francés / Flamenco</span>
+      <span class="chip">🕐 UTC+2</span>
+    </div>
+  </div>
+
+  <!-- LLEGAR -->
+  <div class="city-section">
+    <div class="cs-head">
+      <div class="cs-icon arrive">↓</div>
+      <div><div class="cs-title">Cómo llegar</div><div class="cs-subtitle">Zaventem (BRU) → Airbnb · 12 km</div></div>
+    </div>
+    <div class="cs-body">
+      <p><b>Taxi o Uber/Bolt</b> · 25-35 min · 45-55€ — Llegás 22:30, de noche con Milo dormido. Taxi directo es la mejor opción.</p>
+      <p class="detail">Alternativa: Tren Airport Express a Midi + taxi · 35 min · ~25€</p>
+    </div>
+  </div>
+
+  <!-- ALOJAMIENTO -->
+  <div class="city-section">
+    <div class="cs-head">
+      <div class="cs-icon stay">🏠</div>
+      <div><div class="cs-title">Alojamiento</div><div class="cs-subtitle">Airbnb Saint-Gilles · ✓ Pagado</div></div>
+    </div>
+    <div class="cs-body">
+      <div class="accom-card">
+        <div class="name">Airbnb Saint-Gilles</div>
+        <div class="addr">Chaussée de Charleroi 51B, Saint-Gilles, Bruxelles 1060</div>
+        <div class="times">Check-in: Jue 14, 16:00 · Check-out: Dom 17, 11:00</div>
+        <div class="paid">✓ Pagado $541 · 3 noches · Host: Gautier</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DÍA 1: Bruselas centro -->
+  <div class="day-card">
+    <div class="day-card-head">
+      <span class="dc-num">VIE 15</span>
+      <span class="dc-title">Bruselas centro — Día completo</span>
+    </div>
+    <div class="day-card-body">
+      <p style="font-size:13px;color:var(--tx2);padding:8px 0 4px">Único día completo. 3 zonas caminables como ruta. Con Milo, priorizar Zona 1 y 2.</p>
+      <div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin:10px 0 4px">Zona 1 · Centro histórico · ~3h</div>
+      <div class="hl-scroll"><div class="hl-track">
+        <div class="hl-card"><div class="name">1. Grand Place</div><div class="desc">Corazón UNESCO, arquitectura barroca. Milo puede correr.</div><div class="foot">Gratis</div></div>
+        <div class="hl-card"><div class="name">2. Manneken Pis</div><div class="desc">A 3 min de Grand Place. Foto rápida.</div><div class="foot">Gratis · 3 min</div></div>
+        <div class="hl-card"><div class="name">3. Galerías Saint-Hubert</div><div class="desc">1er shopping cubierto de Europa. Chocolate.</div><div class="foot">Gratis · 2 min</div></div>
+        <div class="hl-card"><div class="name">4. Delirium Café</div><div class="desc">+2000 cervezas. Parada para los padres.</div><div class="foot">Gratis · 1 min</div></div>
+      </div></div>
+      <div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 4px">Zona 2 · Sablon · ~2h</div>
+      <div class="hl-scroll"><div class="hl-track">
+        <div class="hl-card"><div class="name">7. Mont des Arts</div><div class="desc">Mejor mirador urbano. Foto obligatoria.</div><div class="foot">Gratis</div></div>
+        <div class="hl-card"><div class="name">11. Sablon</div><div class="desc">Barrio elegante, antigüedades, chocolate artesanal. Almorzar acá.</div><div class="foot">Gratis · Almuerzo</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- DÍA 2: Day trip Brujas (SUB-DÍA, no ciudad separada) -->
+  <div class="day-card">
+    <div class="day-card-head">
+      <span class="dc-num">SÁB 16</span>
+      <span class="dc-title">Day trip a Brujas</span>
+      <span class="dc-badge daytrip">🚂 Day trip</span>
+    </div>
+    <div class="day-card-body">
+      <div class="tl">
+        <div class="tl-item"><span class="tl-time">09:42</span><span class="tl-place">Bruselas Midi</span></div>
+        <div class="tl-leg">🚂 IC directo · 1h01<span class="status confirmed">✓ $20</span></div>
+        <div class="tl-item"><span class="tl-time">10:43</span><span class="tl-place">Brujas Estación</span></div>
+      </div>
+      <div style="font-size:11px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin:12px 0 4px">Qué ver en Brujas</div>
+      <div class="hl-scroll"><div class="hl-track">
+        <div class="hl-card"><div class="name">Campanario (Belfort)</div><div class="desc">366 escalones, mirador 360°. €14 adulto, Milo gratis.</div><div class="foot">€14 · Reservar</div></div>
+        <div class="hl-card"><div class="name">Plaza Markt</div><div class="desc">Centro neurálgico. Casas gremiales coloridas.</div><div class="foot">Gratis</div></div>
+        <div class="hl-card"><div class="name">Canales (Dijver)</div><div class="desc">Paseo en barco 30 min. €12 adulto, €6 niño.</div><div class="foot">€12</div></div>
+        <div class="hl-card"><div class="name">De Halve Maan</div><div class="desc">Cervecería histórica con tour. €16 con degustación.</div><div class="foot">€16 · Reservar</div></div>
+      </div></div>
+      <div class="tl" style="margin-top:12px">
+        <div class="tl-item"><span class="tl-time">~19:00</span><span class="tl-place">Brujas Estación</span></div>
+        <div class="tl-leg">🚂 IC directo · 1h01</div>
+        <div class="tl-item end"><span class="tl-time">~20:00</span><span class="tl-place">Bruselas Midi → Volver al Airbnb</span></div>
+      </div>
+      <div class="warn">⚠️ Volvés a dormir al Airbnb de Bruselas. Mañana a las 07:00 salís para el Eurostar. Preparar valijas ESTA NOCHE.</div>
+    </div>
+  </div>
+
+  <!-- IRSE -->
+  <div class="city-section">
+    <div class="cs-head">
+      <div class="cs-icon depart">↑</div>
+      <div><div class="cs-title">Cómo irse</div><div class="cs-subtitle">🚂 Eurostar Dom 17, 08:22 → Ámsterdam</div></div>
+    </div>
+    <div class="cs-body">
+      <p><b>Taxi/Uber al Midi</b> · 5-7 min · 10-15€</p>
+      <div class="crit">🚨 Tren sale 08:22, estar a las 08:02. Checkout es 11:00 pero tenés que irte a las 07:00. Valijas preparadas la noche anterior.</div>
+    </div>
+  </div>
+
+  <!-- COMER -->
+  <div class="city-section">
+    <div class="cs-head">
+      <div class="cs-icon eat">🍽</div>
+      <div><div class="cs-title">Dónde comer en Bruselas</div></div>
+    </div>
+    <div class="cs-body">
+      <ul class="eat-list">
+        <li><b>Fin de Siècle</b> — Belga clásico, €12–18. Ambiente auténtico.</li>
+        <li><b>Maison Dandoy</b> — Waffles en Grand Place. Los mejores de Bruselas.</li>
+        <li><b>Cualquier frituur</b> — Frites callejeras. Las mejores del mundo y Milo las ama.</li>
+        <li>Sablon para almuerzo elegante (€15–25). <b>Evitar</b> Rue des Bouchers (trampa turística).</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="city-section">
+    <div class="cs-head">
+      <div class="cs-icon tip">💡</div>
+      <div><div class="cs-title">Tips prácticos</div></div>
+    </div>
+    <div class="cs-body">
+      <ul class="tip-list">
+        <li>Metro eficiente para moverse. Ticket individual 2.50€.</li>
+        <li>Chocolate local <b>mucho más barato</b> que en aeropuerto.</li>
+        <li>Viernes 15: mercado de pulgas cierra 14:00, ir temprano.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ ANNOTATION ━━━ -->
+<div class="anno">
+  <b>✦ ¿Ves cómo Brujas quedó DENTRO de Bruselas?</b> No es una ciudad separada — es un día dentro de tu estadía en Bruselas. Y al final del day trip, dice explícitamente que volvés al Airbnb y que prepares valijas. La sección "Cómo irse" cierra Bruselas con el Eurostar del día siguiente.
+  <div class="anno-how">BP6: Day trips como sub-días · BP3: "Irse" es una transición explícita · BP4: Info práctica agrupada</div>
+</div>
+
+<!-- ━━━ ÁMSTERDAM ━━━ -->
+<div class="city-block" id="amsterdam">
+  <div class="city-header">
+    <h2>🇳🇱 Ámsterdam <span>Holanda</span></h2>
+    <div class="city-dates">2 noches · Dom 17 → Mar 19 mayo</div>
+    <div class="city-meta">
+      <span class="chip">💶 Euro</span>
+      <span class="chip">🌡 12–18°C</span>
+      <span class="chip">🕐 UTC+2</span>
+    </div>
+  </div>
+
+  <!-- LLEGAR -->
+  <div class="city-section">
+    <div class="cs-head">
+      <div class="cs-icon arrive">↓</div>
+      <div><div class="cs-title">Cómo llegar</div><div class="cs-subtitle">🚂 Eurostar desde Bruselas · Llega 11:04</div></div>
+    </div>
+    <div class="cs-body">
+      <p><b>Tram 7</b> desde Amsterdam Centraal → Hotel Euphemia · 15 min · 3.40€</p>
+      <p class="detail">Llegás ~11:30. Check-in desde 14:00 — dejar valijas y salir a almorzar.</p>
+    </div>
+  </div>
+
+  <!-- ALOJAMIENTO -->
+  <div class="city-section">
+    <div class="cs-head">
+      <div class="cs-icon stay">🏠</div>
+      <div><div class="cs-title">Alojamiento</div><div class="cs-subtitle">Hotel Euphemia · ⏳ Parcial</div></div>
+    </div>
+    <div class="cs-body">
+      <div class="accom-card">
+        <div class="name">Hotel Euphemia</div>
+        <div class="addr">Fokke Simonszstraat 1, 1017 TD Amsterdam</div>
+        <div class="times">Check-in: desde 14:00 · Check-out: hasta 10:00</div>
+        <div class="unpaid">⏳ Pagado $184.30 de $388 · Resto en hotel</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DÍA 1: Llegada + tarde -->
+  <div class="day-card">
+    <div class="day-card-head">
+      <span class="dc-num">DOM 17</span>
+      <span class="dc-title">Llegada + tarde libre</span>
+      <span class="dc-badge halfday">½ día</span>
+    </div>
+    <div class="day-card-body">
+      <p style="font-size:13px;color:var(--tx2);padding:8px 0 4px">Llegás ~11:30 del Eurostar. Medio día disponible después del check-in.</p>
+      <div class="hl-scroll"><div class="hl-track">
+        <div class="hl-card"><div class="name">Vondelpark</div><div class="desc">Parque enorme al lado del hotel. Milo puede correr. Descansar del tren.</div><div class="foot">Gratis · 5 min</div></div>
+        <div class="hl-card"><div class="name">Barrio De Pijp</div><div class="desc">Zona trendy, Albert Cuypmarkt hasta 17:00. Stroopwafels.</div><div class="foot">Gratis · 10 min</div></div>
+        <div class="hl-card"><div class="name">Heineken Experience</div><div class="desc">Solo si hay energía. Tour interactivo €23 adulto.</div><div class="foot">€23 · Reservar</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- DÍA 2: Completo -->
+  <div class="day-card">
+    <div class="day-card-head">
+      <span class="dc-num">LUN 18</span>
+      <span class="dc-title">Ámsterdam — Día completo</span>
+    </div>
+    <div class="day-card-body">
+      <p style="font-size:13px;color:var(--tx2);padding:8px 0 4px">Día principal. Elegir Rijksmuseum o Van Gogh (no ambos con Milo).</p>
+      <div class="hl-scroll"><div class="hl-track">
+        <div class="hl-card"><div class="name">Rijksmuseum</div><div class="desc">Rembrandts, Vermeer. 3h+. Grande para Milo.</div><div class="foot">€22.50 · Reservar</div></div>
+        <div class="hl-card"><div class="name">Van Gogh Museum</div><div class="desc">Más compacto (1.5h). Mejor con Milo.</div><div class="foot">€20 · Reservar</div></div>
+        <div class="hl-card"><div class="name">Casa de Ana Frank</div><div class="desc">Reservar con meses. Impactante pero no ideal para niño de 4.</div><div class="foot">€16 · Agotado?</div></div>
+        <div class="hl-card"><div class="name">Jordaan</div><div class="desc">Barrio bohemio. Canales lindos, tiendas, cafés.</div><div class="foot">Gratis</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <!-- IRSE -->
+  <div class="city-section">
+    <div class="cs-head">
+      <div class="cs-icon depart">↑</div>
+      <div><div class="cs-title">Cómo irse</div><div class="cs-subtitle">🚂 ICE Mar 19, 08:00 → Berlín</div></div>
+    </div>
+    <div class="cs-body">
+      <p><b>Taxi/Uber</b> a Amsterdam Centraal · 10 min · 15€</p>
+      <div class="warn">⚠️ Checkout 10:00 pero tren sale 08:00. Salir 07:15. Valijas listas la noche anterior.</div>
+    </div>
+  </div>
+
+  <div class="city-section">
+    <div class="cs-head"><div class="cs-icon eat">🍽</div><div><div class="cs-title">Dónde comer</div></div></div>
+    <div class="cs-body">
+      <ul class="eat-list">
+        <li><b>Albert Cuypmarkt</b> — Stroopwafels calientes, haring, kibbling.</li>
+        <li><b>Foodhallen</b> — Food court hipster en De Hallen. Variedad.</li>
+        <li>Pannenkoeken (panqueques holandeses) — Milo los va a amar.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ ANNOTATION ━━━ -->
+<div class="anno">
+  <b>✦ El día 17 ya no es ambiguo.</b> En el sitio actual, "Day 05: Bruselas → Ámsterdam" no pertenece a ninguna ciudad. Acá la salida está en "Cómo irse" de Bruselas, y la llegada está en "Cómo llegar" de Ámsterdam. El día 17 aparece como "Llegada + tarde" con badge "½ día".
+  <div class="anno-how">BP2: Separar planificación de ejecución · BP5: Pendientes contextualizados</div>
+</div>
+
+<!-- ━━━ BERLÍN ━━━ -->
+<div class="city-block" id="berlin">
+  <div class="city-header">
+    <h2>🇩🇪 Berlín <span>Alemania</span></h2>
+    <div class="city-dates">4 noches · Mar 19 → Sáb 23 mayo</div>
+    <div class="city-meta">
+      <span class="chip">💶 Euro</span>
+      <span class="chip">🌡 11–21°C</span>
+      <span class="chip">🕐 UTC+2</span>
+    </div>
+  </div>
+
+  <div class="city-section">
+    <div class="cs-head"><div class="cs-icon arrive">↓</div><div><div class="cs-title">Cómo llegar</div><div class="cs-subtitle">🚂 ICE desde Ámsterdam · Llega 14:18</div></div></div>
+    <div class="cs-body"><p><b>Caminar</b> desde Berlin Hbf → Airbnb Moabit · 18 min · Gratis</p></div>
+  </div>
+
+  <div class="city-section">
+    <div class="cs-head"><div class="cs-icon stay">🏠</div><div><div class="cs-title">Alojamiento</div><div class="cs-subtitle">Airbnb Moabit · ✓ Pagado</div></div></div>
+    <div class="cs-body">
+      <div class="accom-card">
+        <div class="name">Airbnb Moabit</div>
+        <div class="addr">Essener Straße 13, Berlin 10555</div>
+        <div class="times">Check-in: Mar 19, 16:00 · Check-out: Sáb 23, 11:00</div>
+        <div class="paid">✓ Pagado $603 · 4 noches</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-card-head">
+      <span class="dc-num">MAR 19</span>
+      <span class="dc-title">Llegada + Reichstag 18:30</span>
+      <span class="dc-badge halfday">½ día</span>
+    </div>
+    <div class="day-card-body">
+      <p style="font-size:13px;color:var(--tx2);padding:8px 0 4px">Llegás ~14:18. Check-in, descansar, y a las 18:30 tour guiado del Reichstag.</p>
+      <div class="tl">
+        <div class="tl-item"><span class="tl-time">18:30</span><span class="tl-place">Bundestag — Tour guiado español</span></div>
+        <div class="tl-leg">🏛 Confirmado BA-20260324-003113-490 · 3 personas · Gratis<span class="status confirmed">✓ Reservado</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-card-head"><span class="dc-num">MIÉ 20</span><span class="dc-title">Berlín — Historia</span></div>
+    <div class="day-card-body">
+      <div class="hl-scroll"><div class="hl-track">
+        <div class="hl-card"><div class="name">Puerta de Brandeburgo</div><div class="desc">Arrancar acá. Ícono de Berlín. Foto obligada.</div><div class="foot">Gratis</div></div>
+        <div class="hl-card"><div class="name">Memorial Holocausto</div><div class="desc">2711 bloques de hormigón. Impactante. Subterráneo con nombres.</div><div class="foot">Gratis</div></div>
+        <div class="hl-card"><div class="name">Checkpoint Charlie</div><div class="desc">Paso fronterizo histórico. Muy turístico pero vale verlo.</div><div class="foot">Gratis</div></div>
+        <div class="hl-card"><div class="name">Topografía del Terror</div><div class="desc">Ex sede Gestapo. Museo gratuito al aire libre.</div><div class="foot">Gratis</div></div>
+      </div></div>
+    </div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-card-head"><span class="dc-num">JUE 21</span><span class="dc-title">Berlín — Museos y Muro</span></div>
+    <div class="day-card-body"><p style="font-size:13px;color:var(--tx2);padding:8px 0">Isla de los Museos + East Side Gallery. Día intenso.</p></div>
+  </div>
+
+  <div class="day-card">
+    <div class="day-card-head"><span class="dc-num">VIE 22</span><span class="dc-title">Berlín — Barrios</span></div>
+    <div class="day-card-body"><p style="font-size:13px;color:var(--tx2);padding:8px 0">Kreuzberg + Neukölln. Street art, mercados, ambiente local.</p></div>
+  </div>
+
+  <div class="city-section">
+    <div class="cs-head"><div class="cs-icon depart">↑</div><div><div class="cs-title">Cómo irse</div><div class="cs-subtitle">🚂 EC Sáb 23, 09:28 → Praga</div></div></div>
+    <div class="cs-body">
+      <p><b>Caminar</b> al Hbf · 18 min · Gratis</p>
+      <div class="warn">⚠️ Tren 09:28. Checkout 11:00. Salir ~08:30 caminando con valijas.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ━━━ ANNOTATION ━━━ -->
+<div class="anno">
+  <b>✦ El Reichstag ya no flota en un "día de tren".</b> En el sitio actual, "Day 07: Ámsterdam → Berlín" contiene tanto el checkout de Ámsterdam como el tour del Reichstag. Acá el checkout está en "Cómo irse" de Ámsterdam, y el Reichstag está claramente en el primer día de Berlín como "Llegada + Reichstag 18:30".
+  <div class="anno-how">BP7: Progressive disclosure · BP3: Traslados como transiciones entre ciudades</div>
+</div>
+
+<div style="text-align:center;padding:40px 16px;color:var(--tx2);font-size:14px">
+  <div style="font-size:24px;margin-bottom:8px">·  ·  ·</div>
+  <b>Continúa con Praga, Viena, Budapest, Madrid</b><br>
+  <span style="font-size:12px;color:var(--tx3)">Mismo patrón: Llegar → Alojamiento → Días → Irse → Comer → Tips</span>
+</div>
+
+</main>
+
+<button class="theme-btn" onclick="document.body.classList.toggle('dark');this.textContent=document.body.classList.contains('dark')?'☀️':'🌙'">🌙</button>
+
+</body>
+</html>

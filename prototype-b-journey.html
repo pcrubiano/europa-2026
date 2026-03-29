@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Prototipo B · Journey Timeline — Europa 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--bg2:#fafafa;--surf:#fff;--surf2:#f3f4f6;--tx1:#1a1a1a;--tx2:#6b7280;--tx3:#9ca3af;--brd:#f0f0f0;--brd2:#e5e7eb;--accent:#FF385C;--accent-s:rgba(255,56,92,.08);--ok:#059669;--ok-s:rgba(5,150,105,.06);--warn:#d97706;--warn-s:rgba(217,119,6,.06);--info:#3b82f6;--info-s:rgba(59,130,246,.06);--font:'Inter',system-ui,sans-serif;--r:12px;--r-sm:8px;--r-pill:100px}
+body.dark{--bg:#0f0f0f;--bg2:#141414;--surf:#1a1a1a;--surf2:#232323;--tx1:#f5f5f5;--tx2:#9ca3af;--tx3:#6b6b6b;--brd:#232323;--brd2:#2e2e2e;--accent-s:rgba(255,56,92,.12);--ok-s:rgba(5,150,105,.12);--warn-s:rgba(217,119,6,.12);--info-s:rgba(59,130,246,.1)}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg2);color:var(--tx1);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;font-feature-settings:'cv01' 1,'cv02' 1}
+::selection{background:var(--accent);color:#fff}
+
+/* ── PROTOTYPE BANNER ── */
+.proto-banner{background:#3b82f6;color:#fff;text-align:center;padding:10px 16px;font-size:13px;font-weight:600;letter-spacing:.02em;position:sticky;top:0;z-index:100}
+.proto-banner span{opacity:.7;font-weight:400}
+
+/* ── HEADER ── */
+.hdr{padding:20px 16px 12px;max-width:540px;margin:0 auto;display:flex;align-items:center;justify-content:space-between}
+.hdr-title{font-size:20px;font-weight:700;letter-spacing:-.03em}
+.hdr-sub{font-size:12px;color:var(--tx2);margin-top:2px}
+
+/* ── DATE NAV (primary navigation) ── */
+.date-nav{max-width:540px;margin:0 auto;padding:0 16px 8px;overflow-x:auto;scrollbar-width:none}
+.date-nav::-webkit-scrollbar{display:none}
+.date-track{display:flex;gap:3px;width:max-content}
+.date-pill{display:flex;flex-direction:column;align-items:center;padding:6px 8px;border-radius:var(--r-sm);font-size:10px;font-weight:600;color:var(--tx3);min-width:38px;text-decoration:none;transition:.15s;cursor:pointer}
+.date-pill:active{transform:scale(.95)}
+.date-pill .d-day{font-size:16px;font-weight:700;color:var(--tx2);line-height:1.2}
+.date-pill .d-flag{font-size:12px;margin-top:1px}
+.date-pill.past{opacity:.35}
+.date-pill.today{background:var(--accent);color:#fff;border-radius:var(--r-sm)}
+.date-pill.today .d-day{color:#fff}
+.date-pill.transfer{border-bottom:2px solid var(--warn)}
+
+/* ── CITY CONTEXT BAR (sticky) ── */
+.ctx-bar{position:sticky;top:36px;z-index:50;max-width:540px;margin:0 auto;padding:6px 16px;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:10px}
+body.dark .ctx-bar{background:rgba(15,15,15,.9)}
+.ctx-flag{font-size:22px}
+.ctx-city{font-size:15px;font-weight:700}
+.ctx-info{font-size:11px;color:var(--tx2)}
+.ctx-chips{margin-left:auto;display:flex;gap:4px}
+.ctx-chip{padding:2px 8px;border-radius:var(--r-pill);font-size:10px;font-weight:500;background:var(--surf2);color:var(--tx2)}
+
+/* ── MAIN ── */
+main{max-width:540px;margin:0 auto;padding:0 12px 80px}
+
+/* ── JOURNEY SPINE (the vertical line) ── */
+.spine{position:relative;padding-left:28px;margin:0 4px}
+.spine::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--brd2)}
+
+/* ── DATE BLOCK ── */
+.date-block{position:relative;padding:16px 0 8px}
+.date-block::before{content:'';position:absolute;left:-28px;top:22px;width:18px;height:18px;border-radius:50%;background:var(--bg);border:2.5px solid var(--brd2)}
+.date-block.city-start::before{background:var(--accent);border-color:var(--accent)}
+.date-block.transfer-day::before{background:var(--warn);border-color:var(--warn)}
+
+.date-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.date-label .day-num{color:var(--tx2)}
+.date-label .date-badge{font-size:9px;padding:2px 8px;border-radius:var(--r-pill);font-weight:700}
+.date-badge.today-b{background:var(--accent);color:#fff}
+.date-badge.transfer-b{background:var(--warn-s);color:var(--warn);border:1px solid rgba(217,119,6,.15)}
+.date-badge.daytrip-b{background:var(--info-s);color:var(--info);border:1px solid rgba(59,130,246,.15)}
+.date-badge.halfday-b{background:var(--accent-s);color:var(--accent);border:1px solid rgba(255,56,92,.15)}
+
+/* ── CITY ARRIVAL CARD ── */
+.city-arrive{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:16px;margin-bottom:10px;border-left:3px solid var(--ok)}
+.city-arrive h3{font-size:18px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.city-arrive .sub{font-size:13px;color:var(--tx2);margin-top:4px}
+.city-arrive .meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.city-arrive .meta span{padding:3px 10px;border-radius:var(--r-pill);font-size:10px;font-weight:500;background:var(--surf2);color:var(--tx2)}
+
+/* ── ACCOM INLINE ── */
+.accom-inline{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r-sm);padding:10px 12px;margin:8px 0;font-size:13px}
+.accom-inline .name{font-weight:700}
+.accom-inline .addr{color:var(--tx3);font-size:11px;margin-top:2px}
+.accom-inline .status{font-size:11px;font-weight:600;margin-top:4px}
+.accom-inline .paid{color:var(--ok)}
+.accom-inline .pending{color:var(--warn)}
+
+/* ── TRANSFER CARD ── */
+.transfer-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:14px;margin-bottom:10px;border-left:3px solid var(--warn)}
+.transfer-card .title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.transfer-card .legs{margin-top:8px}
+.transfer-card .leg{display:flex;align-items:center;gap:8px;padding:4px 0;font-size:13px;color:var(--tx2)}
+.transfer-card .leg b{color:var(--tx1)}
+.transfer-card .leg .time{font-weight:700;color:var(--tx1);font-variant-numeric:tabular-nums;min-width:40px}
+.transfer-card .booking{font-size:11px;color:var(--ok);font-weight:600;margin-top:4px}
+
+/* ── ACTIVITY CARD ── */
+.activity-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:14px;margin-bottom:10px}
+.ac-title{font-size:14px;font-weight:700;margin-bottom:6px}
+.ac-summary{font-size:13px;color:var(--tx2);margin-bottom:10px;line-height:1.5}
+
+/* ── HIGHLIGHT CARDS ── */
+.hl-scroll{overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px 4px;scroll-snap-type:x mandatory;-webkit-mask-image:linear-gradient(to right,transparent,black 12px,black calc(100% - 12px),transparent);mask-image:linear-gradient(to right,transparent,black 12px,black calc(100% - 12px),transparent)}
+.hl-scroll::-webkit-scrollbar{display:none}
+.hl-track{display:flex;gap:8px;width:max-content}
+.hl-card{flex:0 0 175px;padding:10px 12px;background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r-sm);scroll-snap-align:start}
+.hl-card .name{font-size:12px;font-weight:600}
+.hl-card .desc{font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.hl-card .foot{font-size:10px;color:var(--tx3);margin-top:6px}
+
+/* ── SECTION LABELS ── */
+.section-label{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 4px}
+
+/* ── RETURN CALLOUT ── */
+.return-callout{background:var(--info-s);border:1px solid rgba(59,130,246,.12);border-radius:var(--r-sm);padding:8px 12px;font-size:12px;color:var(--info);font-weight:500;margin:8px 0;line-height:1.5}
+body.dark .return-callout{background:rgba(59,130,246,.12)}
+
+/* ── WARNING CALLOUT ── */
+.warn-callout{background:var(--warn-s);border:1px solid rgba(217,119,6,.15);border-radius:var(--r-sm);padding:8px 12px;font-size:12px;color:var(--warn);font-weight:600;margin:8px 0;line-height:1.5}
+.crit-callout{background:var(--accent-s);border:1px solid rgba(255,56,92,.15);border-radius:var(--r-sm);padding:8px 12px;font-size:12px;color:var(--accent);font-weight:600;margin:8px 0;line-height:1.5}
+
+/* ── EAT CARD ── */
+.eat-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r-sm);padding:10px 12px;margin-bottom:8px}
+.eat-card .label{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.eat-card ul{list-style:none;padding:0}
+.eat-card li{font-size:12px;color:var(--tx2);padding:2px 0;display:flex;gap:6px}
+.eat-card li::before{content:'🍽️';font-size:10px}
+.eat-card b{color:var(--tx1)}
+
+/* ── CITY DEPART ── */
+.city-depart{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;border-left:3px solid var(--warn)}
+.city-depart .title{font-size:13px;font-weight:700;color:var(--warn)}
+.city-depart p{font-size:12px;color:var(--tx2);margin-top:4px}
+
+/* ── ANNOTATIONS ── */
+.anno{margin:16px 0;padding:14px 16px;background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.12);border-radius:var(--r);font-size:13px;color:#3b82f6;line-height:1.5}
+body.dark .anno{background:rgba(59,130,246,.1)}
+.anno b{font-weight:700}
+.anno-how{font-size:11px;color:var(--tx3);margin-top:6px;font-style:italic}
+
+/* ── THEME ── */
+.theme-btn{position:fixed;bottom:16px;right:16px;width:44px;height:44px;border-radius:50%;background:var(--surf);border:1px solid var(--brd);box-shadow:0 4px 12px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;z-index:50}
+</style>
+</head>
+<body>
+
+<div class="proto-banner">
+  PROTOTIPO B · Journey Timeline <span>— El viaje como narrativa continua, ciudad como contexto</span>
+</div>
+
+<div class="hdr">
+  <div>
+    <div class="hdr-title">Ciudades imperiales</div>
+    <div class="hdr-sub">8 ciudades · 22 días · 13 may – 3 jun 2026</div>
+  </div>
+</div>
+
+<!-- DATE NAV -->
+<div class="date-nav"><div class="date-track">
+  <a class="date-pill past" href="#d13"><span class="d-day">13</span><span style="font-size:9px">MI</span><span class="d-flag">✈</span></a>
+  <a class="date-pill past" href="#d14"><span class="d-day">14</span><span style="font-size:9px">JU</span><span class="d-flag">✈</span></a>
+  <a class="date-pill today" href="#d15"><span class="d-day">15</span><span style="font-size:9px">VI</span><span class="d-flag">🇧🇪</span></a>
+  <a class="date-pill" href="#d16"><span class="d-day">16</span><span style="font-size:9px">SA</span><span class="d-flag">🚂</span></a>
+  <a class="date-pill transfer" href="#d17"><span class="d-day">17</span><span style="font-size:9px">DO</span><span class="d-flag">🚂</span></a>
+  <a class="date-pill" href="#d18"><span class="d-day">18</span><span style="font-size:9px">LU</span><span class="d-flag">🇳🇱</span></a>
+  <a class="date-pill transfer" href="#d19"><span class="d-day">19</span><span style="font-size:9px">MA</span><span class="d-flag">🚂</span></a>
+  <a class="date-pill" href="#d20"><span class="d-day">20</span><span style="font-size:9px">MI</span><span class="d-flag">🇩🇪</span></a>
+  <a class="date-pill" href="#d21"><span class="d-day">21</span><span style="font-size:9px">JU</span><span class="d-flag">🇩🇪</span></a>
+  <a class="date-pill" href="#d22"><span class="d-day">22</span><span style="font-size:9px">VI</span><span class="d-flag">🇩🇪</span></a>
+  <a class="date-pill transfer" href="#d23"><span class="d-day">23</span><span style="font-size:9px">SA</span><span class="d-flag">🚂</span></a>
+  <span style="padding:6px 4px;font-size:10px;color:var(--tx3)">···</span>
+</div></div>
+
+<!-- CITY CONTEXT BAR (changes as you scroll) -->
+<div class="ctx-bar" id="ctxBar">
+  <span class="ctx-flag">🇧🇪</span>
+  <div>
+    <div class="ctx-city">Bruselas</div>
+    <div class="ctx-info">3 noches · Airbnb Saint-Gilles</div>
+  </div>
+  <div class="ctx-chips">
+    <span class="ctx-chip">💶 EUR</span>
+    <span class="ctx-chip">15–20°C</span>
+  </div>
+</div>
+
+<main>
+
+<div class="anno">
+  <b>✦ Modelo Journey Timeline:</b> El viaje se lee como un diario. Cada fecha es un bloque. La barra superior muestra en qué ciudad estás (sticky), con moneda/clima siempre visibles. Los traslados son momentos explícitos entre ciudades — no están escondidos dentro de un día.
+  <div class="anno-how">BP1: "Where am I?" siempre visible · BP2: Separar planificación de ejecución</div>
+</div>
+
+<div class="spine">
+
+<!-- ━━━ 13 MAYO ━━━ -->
+<div class="date-block transfer-day" id="d13">
+  <div class="date-label"><span class="day-num">Día 1</span> Miércoles 13 de mayo <span class="date-badge transfer-b">✈ Vuelo</span></div>
+  <div class="transfer-card">
+    <div class="title">✈️ Buenos Aires → Madrid</div>
+    <div class="legs">
+      <div class="leg"><span class="time">21:40</span> <b>Ezeiza (EZE)</b> — Terminal P</div>
+      <div class="leg" style="font-size:11px;padding-left:48px">✈ Iberia IB0108 · 11h 50m</div>
+      <div class="leg"><span class="time">14:30</span> <b>Barajas (MAD)</b> — T4S · Llega 14 may</div>
+    </div>
+    <div class="booking">✓ Confirmado · $1.800 · Reservó Luisina</div>
+  </div>
+</div>
+
+<!-- ━━━ 14 MAYO ━━━ -->
+<div class="date-block transfer-day" id="d14">
+  <div class="date-label"><span class="day-num">Día 2</span> Jueves 14 de mayo <span class="date-badge transfer-b">✈ Conexión</span></div>
+  <div class="transfer-card">
+    <div class="title">✈️ Madrid → Bruselas</div>
+    <div class="legs">
+      <div class="leg"><span class="time">14:30</span> Llegada Madrid T4S</div>
+      <div class="leg" style="font-size:11px;padding-left:48px">⏳ Espera en Barajas · 5h 40m</div>
+      <div class="leg"><span class="time">20:10</span> <b>Vuelo Madrid → Bruselas</b></div>
+      <div class="leg" style="font-size:11px;padding-left:48px">✈ Iberia IB0603 · 2h 20m</div>
+      <div class="leg"><span class="time">22:30</span> <b>Zaventem (BRU)</b></div>
+    </div>
+    <div class="booking">✓ Confirmado · $513</div>
+  </div>
+  <div class="crit-callout">🚨 Confirmar T4 o T4S antes de moverse. Tránsito entre terminales puede tomar 30 min.</div>
+
+  <!-- ARRIVAL IN BRUSSELS -->
+  <div class="city-arrive">
+    <h3>🇧🇪 Bienvenidos a Bruselas</h3>
+    <div class="sub">3 noches · 14 → 17 mayo · Llegás 22:30</div>
+    <div class="meta">
+      <span>💶 Euro</span>
+      <span>🌡 15–20°C</span>
+      <span>🗣 Francés / Flamenco</span>
+    </div>
+  </div>
+  <div class="accom-inline">
+    <div class="name">🏠 Airbnb Saint-Gilles</div>
+    <div class="addr">Chaussée de Charleroi 51B, 1060 · Zona trendy, cerca de Ixelles</div>
+    <div class="status"><span class="paid">✓ Pagado $541 · 3 noches · Host: Gautier</span></div>
+  </div>
+  <div class="return-callout">↓ Taxi/Uber desde Zaventem · 25-35 min · 45-55€ · Planta 0 arrivals</div>
+</div>
+
+<!-- ━━━ 15 MAYO ━━━ -->
+<div class="date-block city-start" id="d15">
+  <div class="date-label"><span class="day-num">Día 3</span> Viernes 15 de mayo <span class="date-badge today-b">HOY</span></div>
+  <div class="activity-card">
+    <div class="ac-title">Bruselas — Día completo</div>
+    <div class="ac-summary">Único día completo. 3 zonas caminables como ruta. Con Milo, priorizar Zona 1 y 2.</div>
+
+    <div class="section-label">Zona 1 · Centro histórico · ~3h</div>
+    <div class="hl-scroll"><div class="hl-track">
+      <div class="hl-card"><div class="name">1. Grand Place</div><div class="desc">Corazón UNESCO, barroca. Milo puede correr.</div><div class="foot">Gratis</div></div>
+      <div class="hl-card"><div class="name">2. Manneken Pis</div><div class="desc">A 3 min. Foto rápida, es chiquito.</div><div class="foot">Gratis · 3 min</div></div>
+      <div class="hl-card"><div class="name">3. Galerías Saint-Hubert</div><div class="desc">1er shopping cubierto de Europa. Chocolate.</div><div class="foot">Gratis · 2 min</div></div>
+      <div class="hl-card"><div class="name">4. Delirium Café</div><div class="desc">+2000 cervezas. Parada para los padres.</div><div class="foot">Gratis</div></div>
+    </div></div>
+
+    <div class="section-label">Zona 2 · Sablon · ~2h</div>
+    <div class="hl-scroll"><div class="hl-track">
+      <div class="hl-card"><div class="name">7. Mont des Arts</div><div class="desc">Mejor mirador urbano. Foto obligatoria.</div><div class="foot">Gratis</div></div>
+      <div class="hl-card"><div class="name">11. Sablon</div><div class="desc">Elegante, antigüedades, chocolate. Almorzar acá.</div><div class="foot">Gratis · Almuerzo</div></div>
+    </div></div>
+  </div>
+
+  <div class="eat-card">
+    <div class="label">🍽 Dónde comer en Bruselas</div>
+    <ul>
+      <li><b>Fin de Siècle</b> — Belga clásico, €12–18</li>
+      <li><b>Maison Dandoy</b> — Waffles. Grand Place.</li>
+      <li>Sablon para almuerzo elegante (€15–25)</li>
+      <li><b>Evitar</b> Rue des Bouchers (trampa turística)</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ━━━ 16 MAYO ━━━ -->
+<div class="date-block" id="d16">
+  <div class="date-label"><span class="day-num">Día 4</span> Sábado 16 de mayo <span class="date-badge daytrip-b">🚂 Day trip</span></div>
+
+  <div class="activity-card">
+    <div class="ac-title">Day trip a Brujas 🇧🇪</div>
+    <div class="ac-summary">Ida y vuelta en tren desde Bruselas. Medieval, canales, chocolate, cervezas.</div>
+
+    <div class="transfer-card" style="border-left-color:var(--info);margin-bottom:10px">
+      <div class="title" style="color:var(--info)">🚂 Ida: Bruselas → Brujas</div>
+      <div class="legs">
+        <div class="leg"><span class="time">09:42</span> <b>Bruselas Midi</b></div>
+        <div class="leg" style="font-size:11px;padding-left:48px">IC directo · 1h01</div>
+        <div class="leg"><span class="time">10:43</span> <b>Brujas Estación</b></div>
+      </div>
+      <div class="booking">✓ Confirmado · $20</div>
+    </div>
+
+    <div class="section-label">Qué ver en Brujas</div>
+    <div class="hl-scroll"><div class="hl-track">
+      <div class="hl-card"><div class="name">Campanario (Belfort)</div><div class="desc">366 escalones, mirador 360°. €14.</div><div class="foot">€14 · Reservar</div></div>
+      <div class="hl-card"><div class="name">Plaza Markt</div><div class="desc">Centro neurálgico. Casas gremiales.</div><div class="foot">Gratis</div></div>
+      <div class="hl-card"><div class="name">Canales (Dijver)</div><div class="desc">Paseo en barco 30 min. €12.</div><div class="foot">€12</div></div>
+      <div class="hl-card"><div class="name">De Halve Maan</div><div class="desc">Cervecería histórica. €16 con tour.</div><div class="foot">€16 · Reservar</div></div>
+    </div></div>
+
+    <div class="transfer-card" style="border-left-color:var(--info);margin-top:10px">
+      <div class="title" style="color:var(--info)">🚂 Vuelta: Brujas → Bruselas</div>
+      <div class="legs">
+        <div class="leg"><span class="time">~19:00</span> <b>Brujas Estación</b></div>
+        <div class="leg" style="font-size:11px;padding-left:48px">IC directo · 1h01</div>
+        <div class="leg"><span class="time">~20:00</span> <b>Bruselas Midi → Volver al Airbnb</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="return-callout">🏠 Volvés a dormir al Airbnb de Bruselas (Saint-Gilles). Último checkout mañana 11:00 — pero salís 07:00.</div>
+  <div class="crit-callout">🚨 Preparar valijas ESTA NOCHE. Mañana el Eurostar sale 08:22 y tenés que estar en Midi a las 08:00.</div>
+</div>
+
+<!-- ━━━ ANNOTATION ━━━ -->
+<div class="anno" style="margin-left:0">
+  <b>✦ El regreso a Bruselas es explícito.</b> En el sitio actual, después de Brujas viene Ámsterdam — sin decirte que volvés al Airbnb ni que prepares valijas. Acá el callout azul dice "Volvés a dormir al Airbnb" y el rojo avisa de las valijas.
+  <div class="anno-how">BP6: Day trips con retorno explícito · BP4: Info práctica donde la necesitás</div>
+</div>
+
+<!-- ━━━ 17 MAYO ━━━ -->
+<div class="date-block transfer-day" id="d17">
+  <div class="date-label"><span class="day-num">Día 5</span> Domingo 17 de mayo <span class="date-badge transfer-b">🚂 Traslado</span> <span class="date-badge halfday-b">½ día</span></div>
+
+  <div class="city-depart">
+    <div class="title">↑ Salir de Bruselas</div>
+    <p>Taxi/Uber a Midi · 5-7 min · 10-15€</p>
+  </div>
+
+  <div class="transfer-card">
+    <div class="title">🚂 Bruselas → Ámsterdam</div>
+    <div class="legs">
+      <div class="leg"><span class="time">08:22</span> <b>Bruselas Midi</b></div>
+      <div class="leg" style="font-size:11px;padding-left:48px">Eurostar · 2h42</div>
+      <div class="leg"><span class="time">11:04</span> <b>Amsterdam Centraal</b></div>
+    </div>
+    <div class="booking">✓ Confirmado · €120</div>
+  </div>
+
+  <div class="city-arrive">
+    <h3>🇳🇱 Bienvenidos a Ámsterdam</h3>
+    <div class="sub">2 noches · 17 → 19 mayo · Llegás 11:04</div>
+    <div class="meta">
+      <span>💶 Euro</span>
+      <span>🌡 12–18°C</span>
+    </div>
+  </div>
+  <div class="accom-inline">
+    <div class="name">🏠 Hotel Euphemia</div>
+    <div class="addr">Fokke Simonszstraat 1, 1017 TD Amsterdam</div>
+    <div class="status"><span class="pending">⏳ Pagado $184.30 de $388 · Resto en hotel</span></div>
+  </div>
+  <div class="return-callout">↓ Tram 7 desde Centraal · 15 min · 3.40€ · Check-in desde 14:00</div>
+
+  <div class="activity-card" style="margin-top:10px">
+    <div class="ac-title">Tarde libre en Ámsterdam</div>
+    <div class="ac-summary">Llegás ~11:30. Dejás valijas y medio día disponible.</div>
+    <div class="hl-scroll"><div class="hl-track">
+      <div class="hl-card"><div class="name">Vondelpark</div><div class="desc">Parque enorme al lado del hotel. Milo puede correr.</div><div class="foot">Gratis · 5 min</div></div>
+      <div class="hl-card"><div class="name">Barrio De Pijp</div><div class="desc">Albert Cuypmarkt hasta 17:00. Stroopwafels.</div><div class="foot">Gratis</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- ━━━ ANNOTATION ━━━ -->
+<div class="anno" style="margin-left:0">
+  <b>✦ El día 17 ya no pertenece a "ninguna" ciudad.</b> Es un día de traslado explícito con 3 momentos claros: salir de Bruselas → tren → llegar a Ámsterdam + tarde. La barra de contexto (sticky arriba) cambia de 🇧🇪 a 🇳🇱 al scrollear este bloque.
+  <div class="anno-how">BP3: Traslados como transiciones · BP1: "Where am I?" siempre visible</div>
+</div>
+
+<!-- ━━━ 18 MAYO ━━━ -->
+<div class="date-block" id="d18">
+  <div class="date-label"><span class="day-num">Día 6</span> Lunes 18 de mayo</div>
+  <div class="activity-card">
+    <div class="ac-title">Ámsterdam — Día completo</div>
+    <div class="ac-summary">Día principal. Elegir Rijksmuseum o Van Gogh (no ambos con Milo).</div>
+    <div class="hl-scroll"><div class="hl-track">
+      <div class="hl-card"><div class="name">Rijksmuseum</div><div class="desc">Rembrandts, Vermeer. 3h+. Grande para Milo.</div><div class="foot">€22.50 · Reservar</div></div>
+      <div class="hl-card"><div class="name">Van Gogh Museum</div><div class="desc">Más compacto (1.5h). Mejor con Milo.</div><div class="foot">€20 · Reservar</div></div>
+      <div class="hl-card"><div class="name">Jordaan</div><div class="desc">Barrio bohemio. Canales, tiendas, cafés.</div><div class="foot">Gratis</div></div>
+    </div></div>
+  </div>
+  <div class="eat-card">
+    <div class="label">🍽 Dónde comer en Ámsterdam</div>
+    <ul>
+      <li><b>Albert Cuypmarkt</b> — Stroopwafels, haring, kibbling</li>
+      <li><b>Foodhallen</b> — Food court en De Hallen. Variedad.</li>
+      <li>Pannenkoeken (panqueques holandeses) — Milo los ama.</li>
+    </ul>
+  </div>
+  <div class="warn-callout">⚠️ Mañana tren ICE 08:00 a Berlín. Checkout 10:00 pero salir 07:15. Valijas listas esta noche.</div>
+</div>
+
+<!-- ━━━ 19 MAYO ━━━ -->
+<div class="date-block transfer-day" id="d19">
+  <div class="date-label"><span class="day-num">Día 7</span> Martes 19 de mayo <span class="date-badge transfer-b">🚂 Traslado</span> <span class="date-badge halfday-b">½ día</span></div>
+
+  <div class="city-depart">
+    <div class="title">↑ Salir de Ámsterdam</div>
+    <p>Taxi/Uber a Centraal · 10 min · 15€ · Checkout 10:00 pero salir 07:15</p>
+  </div>
+
+  <div class="transfer-card">
+    <div class="title">🚂 Ámsterdam → Berlín</div>
+    <div class="legs">
+      <div class="leg"><span class="time">08:00</span> <b>Amsterdam Centraal</b></div>
+      <div class="leg" style="font-size:11px;padding-left:48px">ICE · 6h18</div>
+      <div class="leg"><span class="time">14:18</span> <b>Berlin Hauptbahnhof</b></div>
+    </div>
+    <div class="booking">✓ Confirmado · €120</div>
+  </div>
+
+  <div class="city-arrive">
+    <h3>🇩🇪 Bienvenidos a Berlín</h3>
+    <div class="sub">4 noches · 19 → 23 mayo · Llegás 14:18</div>
+    <div class="meta">
+      <span>💶 Euro</span>
+      <span>🌡 11–21°C</span>
+    </div>
+  </div>
+  <div class="accom-inline">
+    <div class="name">🏠 Airbnb Moabit</div>
+    <div class="addr">Essener Straße 13, Berlin 10555</div>
+    <div class="status"><span class="paid">✓ Pagado $603 · 4 noches</span></div>
+  </div>
+  <div class="return-callout">↓ Caminar desde Hbf · 18 min · Gratis · Check-in 16:00</div>
+
+  <div class="activity-card" style="margin-top:10px">
+    <div class="ac-title">Tarde: Reichstag 18:30</div>
+    <div class="ac-summary">Check-in, descansar, y a las 18:30 tour guiado del Bundestag en español. Reservado.</div>
+    <div style="font-size:12px;color:var(--ok);font-weight:600;margin-top:4px">✓ Confirmado BA-20260324-003113-490 · 3 personas · Gratis</div>
+  </div>
+</div>
+
+<!-- ━━━ ANNOTATION ━━━ -->
+<div class="anno" style="margin-left:0">
+  <b>✦ El Reichstag está claramente en Berlín, no en un "día de tren".</b> El día 19 tiene 3 actos: salir de Ámsterdam → tren → llegar a Berlín + Reichstag. Cada acto es visualmente distinto. La barra de contexto cambia de 🇳🇱 a 🇩🇪 al llegar.
+  <div class="anno-how">BP7: Progressive disclosure · BP3: Traslados son momentos, no días</div>
+</div>
+
+<!-- ━━━ 20 MAYO ━━━ -->
+<div class="date-block" id="d20">
+  <div class="date-label"><span class="day-num">Día 8</span> Miércoles 20 de mayo</div>
+  <div class="activity-card">
+    <div class="ac-title">Berlín — Historia</div>
+    <div class="hl-scroll"><div class="hl-track">
+      <div class="hl-card"><div class="name">Puerta de Brandeburgo</div><div class="desc">Arrancar acá. Ícono de Berlín.</div><div class="foot">Gratis</div></div>
+      <div class="hl-card"><div class="name">Memorial Holocausto</div><div class="desc">2711 bloques. Impactante.</div><div class="foot">Gratis</div></div>
+      <div class="hl-card"><div class="name">Checkpoint Charlie</div><div class="desc">Paso fronterizo histórico.</div><div class="foot">Gratis</div></div>
+      <div class="hl-card"><div class="name">Topografía del Terror</div><div class="desc">Ex sede Gestapo. Museo al aire libre.</div><div class="foot">Gratis</div></div>
+    </div></div>
+  </div>
+</div>
+
+<!-- 21 & 22 abbreviated -->
+<div class="date-block" id="d21">
+  <div class="date-label"><span class="day-num">Día 9</span> Jueves 21 de mayo</div>
+  <div class="activity-card"><div class="ac-title">Berlín — Museos y Muro</div><div class="ac-summary">Isla de los Museos + East Side Gallery. Día intenso.</div></div>
+</div>
+
+<div class="date-block" id="d22">
+  <div class="date-label"><span class="day-num">Día 10</span> Viernes 22 de mayo</div>
+  <div class="activity-card"><div class="ac-title">Berlín — Barrios</div><div class="ac-summary">Kreuzberg + Neukölln. Street art, mercados, ambiente local.</div></div>
+  <div class="warn-callout">⚠️ Mañana tren 09:28 a Praga. Checkout 11:00. Salir ~08:30 caminando con valijas.</div>
+</div>
+
+<!-- ━━━ 23 MAYO ━━━ -->
+<div class="date-block transfer-day" id="d23">
+  <div class="date-label"><span class="day-num">Día 11</span> Sábado 23 de mayo <span class="date-badge transfer-b">🚂 Traslado</span></div>
+  <div class="city-depart">
+    <div class="title">↑ Salir de Berlín</div>
+    <p>Caminar al Hbf · 18 min · Gratis</p>
+  </div>
+  <div class="transfer-card">
+    <div class="title">🚂 Berlín → Praga</div>
+    <div class="legs">
+      <div class="leg"><span class="time">09:28</span> <b>Berlin Hbf</b></div>
+      <div class="leg" style="font-size:11px;padding-left:48px">EC · 4h30</div>
+      <div class="leg"><span class="time">13:58</span> <b>Praha hlavní nádraží</b></div>
+    </div>
+  </div>
+  <div class="city-arrive">
+    <h3>🇨🇿 Bienvenidos a Praga</h3>
+    <div class="sub">3 noches · 23 → 26 mayo</div>
+  </div>
+</div>
+
+</div><!-- end .spine -->
+
+<div style="text-align:center;padding:40px 16px;color:var(--tx2);font-size:14px">
+  <div style="font-size:24px;margin-bottom:8px">·  ·  ·</div>
+  <b>Continúa con Praga, Viena, Budapest, Madrid</b><br>
+  <span style="font-size:12px;color:var(--tx3)">Mismo patrón: date blocks + city arrivals + activities + departures</span>
+</div>
+
+</main>
+
+<button class="theme-btn" onclick="document.body.classList.toggle('dark');this.textContent=document.body.classList.contains('dark')?'☀️':'🌙'">🌙</button>
+
+</body>
+</html>
