@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+<title>Prototipo B Full · Journey Timeline — Europa 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#fff;--bg2:#fafafa;--surf:#fff;--surf2:#f3f4f6;--tx1:#1a1a1a;--tx2:#6b7280;--tx3:#9ca3af;--brd:#f0f0f0;--brd2:#e5e7eb;--accent:#FF385C;--accent-s:rgba(255,56,92,.08);--ok:#059669;--ok-s:rgba(5,150,105,.06);--warn:#d97706;--warn-s:rgba(217,119,6,.06);--info:#3b82f6;--info-s:rgba(59,130,246,.06);--font:'Inter',system-ui,sans-serif;--r:12px;--r-sm:8px;--r-pill:100px;--sat:env(safe-area-inset-top,0px);--sab:env(safe-area-inset-bottom,0px)}
+body.dark{--bg:#0f0f0f;--bg2:#141414;--surf:#1a1a1a;--surf2:#232323;--tx1:#f5f5f5;--tx2:#9ca3af;--tx3:#6b6b6b;--brd:#232323;--brd2:#2e2e2e;--accent-s:rgba(255,56,92,.12);--ok-s:rgba(5,150,105,.12);--warn-s:rgba(217,119,6,.12);--info-s:rgba(59,130,246,.1)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:var(--font);background:var(--bg2);color:var(--tx1);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;font-feature-settings:'cv01' 1,'cv02' 1;padding-top:var(--sat);padding-bottom:var(--sab);transition:background .3s,color .3s}
+::selection{background:var(--accent);color:#fff}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+input:focus-visible{outline-offset:0}
+button{font:inherit;cursor:pointer;border:none;background:none}
+a{color:inherit;text-decoration:none}
+::-webkit-scrollbar{width:0;height:0}
+
+/* ── PROGRESS BAR ── */
+.progress-bar{position:fixed;top:0;left:0;width:0%;height:2px;background:linear-gradient(90deg,var(--accent),#ff8c42);z-index:200;pointer-events:none;transition:width .08s linear}
+
+/* ── HEADER ── */
+.hdr{position:sticky;top:0;z-index:90;background:rgba(255,255,255,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--brd);padding:10px 16px;display:flex;align-items:center;gap:10px;max-width:540px;margin:0 auto;transition:background .3s}
+body.dark .hdr{background:rgba(15,15,15,.92)}
+.hdr-left{flex-shrink:0}
+.hdr-title{font-size:16px;font-weight:700;letter-spacing:-.03em}
+.hdr-sub{font-size:10px;color:var(--tx3)}
+.hdr-search-wrap{flex:1;min-width:80px;position:relative}
+.hdr-search{width:100%;padding:7px 32px 7px 28px;border:1px solid var(--brd2);border-radius:var(--r-pill);background:var(--surf2);color:var(--tx1);font-size:12px;font-family:var(--font);outline:none;transition:border-color .2s,box-shadow .2s}
+.hdr-search::placeholder{color:var(--tx3)}
+.hdr-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-s)}
+.hdr-search-icon{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:11px;pointer-events:none;color:var(--tx3)}
+.hdr-kbd{position:absolute;right:8px;top:50%;transform:translateY(-50%);font-size:9px;font-weight:600;color:var(--tx3);background:var(--surf);border:1px solid var(--brd2);border-radius:3px;padding:1px 4px;pointer-events:none;opacity:.7}
+.hdr-search:focus~.hdr-kbd{opacity:0}
+.hdr-actions{display:flex;gap:6px;flex-shrink:0}
+.theme-btn{width:36px;height:36px;border-radius:50%;background:var(--surf2);display:flex;align-items:center;justify-content:center;font-size:14px;transition:.15s}
+.theme-btn:active{transform:scale(.9)}
+.search-drop{position:fixed;top:46px;left:8px;right:8px;max-width:524px;margin:0 auto;background:var(--surf);border:1px solid var(--brd2);border-radius:var(--r);box-shadow:0 8px 24px rgba(0,0,0,.15);max-height:260px;overflow-y:auto;z-index:200;opacity:0;transform:translateY(-4px);pointer-events:none;transition:opacity .15s,transform .15s}
+.search-drop.open{opacity:1;transform:translateY(0);pointer-events:auto}
+.search-item{padding:8px 12px;cursor:pointer;border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px}
+.search-item:last-child{border-bottom:none}
+.search-item:hover,.search-item.active{background:var(--surf2)}
+.search-item-cat{font-size:14px;flex-shrink:0}
+.search-item-text{flex:1;min-width:0}
+.search-item-title{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.search-item-ctx{font-size:10px;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ── DATE NAV ── */
+.date-nav{position:sticky;top:46px;z-index:80;background:rgba(255,255,255,.88);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--brd);max-width:540px;margin:0 auto;padding:6px 12px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+body.dark .date-nav{background:rgba(15,15,15,.88)}
+.date-nav::-webkit-scrollbar{display:none}
+.date-track{display:flex;gap:2px;width:max-content}
+.date-pill{display:flex;flex-direction:column;align-items:center;padding:4px 6px;border-radius:var(--r-sm);font-size:9px;font-weight:600;color:var(--tx3);min-width:34px;cursor:pointer;transition:.15s;text-decoration:none}
+.date-pill:active{transform:scale(.95)}
+.date-pill .dp-day{font-size:14px;font-weight:700;color:var(--tx2);line-height:1.2}
+.date-pill .dp-flag{font-size:11px;margin-top:1px}
+.date-pill.past{opacity:.3}
+.date-pill.active{background:var(--accent);color:#fff;border-radius:var(--r-sm)}
+.date-pill.active .dp-day{color:#fff}
+.date-pill.transfer{border-bottom:2px solid var(--warn)}
+
+/* ── CITY CONTEXT BAR ── */
+.ctx-bar{position:sticky;top:80px;z-index:70;max-width:540px;margin:0 auto;padding:6px 16px;background:rgba(255,255,255,.92);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--brd);display:flex;align-items:center;gap:8px;transition:background .3s}
+body.dark .ctx-bar{background:rgba(15,15,15,.92)}
+.ctx-flag{font-size:20px}
+.ctx-city{font-size:14px;font-weight:700}
+.ctx-info{font-size:10px;color:var(--tx2)}
+.ctx-right{margin-left:auto;display:flex;gap:4px}
+.ctx-chip{padding:2px 7px;border-radius:var(--r-pill);font-size:9px;font-weight:500;background:var(--surf2);color:var(--tx2)}
+
+/* ── MAIN ── */
+main{max-width:540px;margin:0 auto;padding:0 12px 100px}
+
+/* ── HERO ── */
+.hero{padding:24px 16px 16px;text-align:center}
+.hero-title{font-size:26px;font-weight:700;letter-spacing:-.03em;background:linear-gradient(180deg,var(--tx1) 40%,var(--tx2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-date{font-size:13px;color:var(--tx2);margin-top:4px}
+.hero-stats{font-size:12px;color:var(--tx2);margin-top:10px;line-height:1.6}
+.hero-stats span{color:var(--tx3);font-size:11px}
+.route-wrap{overflow-x:auto;scrollbar-width:none;margin:12px -16px 0;padding:0 16px;-webkit-mask-image:linear-gradient(to right,transparent,black 12px,black calc(100% - 12px),transparent)}
+.route-wrap::-webkit-scrollbar{display:none}
+.route{display:flex;align-items:center;width:max-content;gap:0;padding-bottom:4px}
+.route-stop{display:flex;flex-direction:column;align-items:center;gap:1px;padding:3px 6px;min-width:40px}
+.route-flag{font-size:14px}
+.route-city{font-size:9px;font-weight:600;white-space:nowrap}
+.route-nights{font-size:8px;color:var(--tx3)}
+.route-line{display:flex;align-items:center;gap:2px;padding:0 1px;color:var(--tx2);font-size:9px}
+.route-line::before,.route-line::after{content:'';width:8px;height:0;border-top:1.5px dashed var(--brd2)}
+
+/* ── SPINE ── */
+.spine{position:relative;padding-left:28px;margin:0 4px}
+.spine::before{content:'';position:absolute;left:8px;top:0;bottom:0;width:2px;background:var(--brd2)}
+
+/* ── DATE BLOCK ── */
+.date-block{position:relative;padding:20px 0 8px}
+.date-block::before{content:'';position:absolute;left:-28px;top:26px;width:16px;height:16px;border-radius:50%;background:var(--bg);border:2.5px solid var(--brd2);z-index:1}
+.date-block.city-start::before{background:var(--accent);border-color:var(--accent)}
+.date-block.transfer-day::before{background:var(--warn);border-color:var(--warn)}
+.date-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx3);margin-bottom:8px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.date-label .day-num{color:var(--tx2)}
+.dbadge{font-size:8px;padding:2px 7px;border-radius:var(--r-pill);font-weight:700;letter-spacing:.02em}
+.dbadge-flight{background:var(--accent-s);color:var(--accent);border:1px solid rgba(255,56,92,.15)}
+.dbadge-train{background:var(--warn-s);color:var(--warn);border:1px solid rgba(217,119,6,.15)}
+.dbadge-daytrip{background:var(--info-s);color:var(--info);border:1px solid rgba(59,130,246,.15)}
+.dbadge-half{background:var(--accent-s);color:var(--accent);border:1px solid rgba(255,56,92,.12)}
+.dbadge-today{background:var(--accent);color:#fff}
+.dbadge-tomorrow{background:var(--surf2);color:var(--tx2);border:1px solid var(--brd2)}
+
+/* ── CITY ARRIVAL ── */
+.city-arrive{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:14px;margin-bottom:10px;border-left:3px solid var(--ok)}
+.city-arrive h3{font-size:17px;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:6px}
+.city-arrive .ca-sub{font-size:12px;color:var(--tx2);margin-top:3px}
+.city-arrive .ca-meta{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.city-arrive .ca-meta span{padding:3px 8px;border-radius:var(--r-pill);font-size:9px;font-weight:500;background:var(--surf2);color:var(--tx2)}
+
+/* ── ACCOMMODATION ── */
+.accom-card{background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r-sm);padding:10px 12px;margin:8px 0;font-size:12px}
+.accom-card .ac-name{font-weight:700;font-size:13px}
+.accom-card .ac-addr{color:var(--tx3);font-size:11px;margin-top:2px}
+.accom-card .ac-addr a{color:inherit;text-decoration:underline;text-decoration-color:var(--brd2);text-underline-offset:2px}
+.accom-card .ac-addr a:hover{text-decoration-color:var(--accent)}
+.accom-card .ac-times{color:var(--tx2);margin-top:4px;font-size:11px}
+.accom-card .ac-status{font-weight:600;margin-top:4px}
+.ac-paid{color:var(--ok)}
+.ac-pending{color:var(--warn)}
+.accom-card .ac-link{display:inline-block;margin-top:4px;font-size:11px;font-weight:600;color:var(--accent)}
+
+/* ── TRANSFER CARD ── */
+.transfer-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;border-left:3px solid var(--warn)}
+.transfer-card .tc-title{font-size:14px;font-weight:700;display:flex;align-items:center;gap:6px}
+.transfer-card .tc-legs{margin-top:6px}
+.transfer-card .tc-leg{display:flex;align-items:center;gap:6px;padding:3px 0;font-size:12px;color:var(--tx2)}
+.tc-leg b{color:var(--tx1)}
+.tc-leg .tc-time{font-weight:700;color:var(--tx1);font-variant-numeric:tabular-nums;min-width:38px}
+.tc-detail{font-size:10px;color:var(--tx3);padding-left:44px}
+.tc-booking{font-size:11px;font-weight:600;margin-top:4px}
+.tc-booking.confirmed{color:var(--ok)}
+.tc-booking.pending{color:var(--warn)}
+.tc-booking a{color:var(--accent);margin-left:6px}
+
+/* ── ACTIVITY CARD ── */
+.act-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer;transition:transform .12s}
+.act-card:active{transform:scale(.995)}
+.act-title{font-size:14px;font-weight:700;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.act-summary{font-size:12px;color:var(--tx2);line-height:1.5;margin-bottom:8px}
+.act-chev{margin-left:auto;font-size:9px;color:var(--tx3);transition:transform .3s;flex-shrink:0}
+.act-card.open .act-chev{transform:rotate(180deg)}
+.act-body{height:0;overflow:hidden;transition:height .35s cubic-bezier(.32,1.25,.32,1)}
+.act-inner{padding-top:8px;border-top:1px solid var(--brd);opacity:0;transform:translateY(4px);transition:opacity .25s .1s,transform .25s .1s}
+.act-card.open .act-inner{opacity:1;transform:translateY(0)}
+
+/* ── SECTION LABEL ── */
+.slabel{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin:10px 0 6px}
+
+/* ── HIGHLIGHT CARDS ── */
+.hl-scroll{overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px 4px;scroll-snap-type:x mandatory;-webkit-mask-image:linear-gradient(to right,transparent,black 12px,black calc(100% - 12px),transparent)}
+.hl-scroll::-webkit-scrollbar{display:none}
+.hl-row{display:flex;gap:8px;width:max-content}
+.hl-card{flex:0 0 185px;min-width:185px;padding:10px 12px;background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r-sm);scroll-snap-align:start;display:block;color:inherit;text-decoration:none;position:relative;transition:transform .12s,box-shadow .12s}
+.hl-card:active{transform:scale(.97)}
+.hl-card::after{content:'\2192';position:absolute;top:10px;right:10px;font-size:11px;color:var(--tx3);transition:transform .15s}
+.hl-card .hl-name{font-size:12px;font-weight:600;padding-right:14px}
+.hl-card .hl-desc{font-size:11px;color:var(--tx2);margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.hl-card .hl-foot{font-size:9px;color:var(--tx3);margin-top:6px;display:block}
+
+/* ── CALLOUTS ── */
+.callout{margin:8px 0;padding:8px 12px;border-radius:var(--r-sm);font-size:12px;font-weight:500;line-height:1.5}
+.callout-return{background:var(--info-s);border:1px solid rgba(59,130,246,.12);color:var(--info)}
+body.dark .callout-return{background:rgba(59,130,246,.12)}
+.callout-warn{background:var(--warn-s);border:1px solid rgba(217,119,6,.15);color:var(--warn);font-weight:600}
+.callout-crit{background:var(--accent-s);border:1px solid rgba(255,56,92,.15);color:var(--accent);font-weight:600}
+.callout-info{background:var(--info-s);border:1px solid rgba(59,130,246,.12);color:var(--info)}
+
+/* ── NOTE ── */
+.note{margin:8px 0;padding:10px 12px;font-size:12px;line-height:1.5;color:var(--tx2);background:var(--bg2);border-left:3px solid var(--brd2);border-radius:0 var(--r-sm) var(--r-sm) 0}
+.note b,.note strong{font-weight:600;color:var(--tx1)}
+.note a{color:var(--accent);text-decoration:underline;text-underline-offset:2px}
+.note-info{border-left-color:#3b82f6;background:rgba(59,130,246,.05)}
+body.dark .note-info{background:rgba(59,130,246,.1)}
+.note-alert{border-left-color:var(--warn);color:var(--warn)}
+body.dark .note-alert{color:#fbbf24}
+.note-crit{border-left-color:#ef4444;background:rgba(239,68,68,.05)}
+body.dark .note-crit{background:rgba(239,68,68,.1)}
+.note-crit,.note-crit b{color:#ef4444}
+body.dark .note-crit,body.dark .note-crit b{color:#f87171}
+
+/* ── CITY DEPART ── */
+.city-depart{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:10px 12px;margin-bottom:10px;border-left:3px solid var(--warn)}
+.city-depart .cd-title{font-size:12px;font-weight:700;color:var(--warn)}
+.city-depart p{font-size:11px;color:var(--tx2);margin-top:2px}
+
+/* ── EAT CARD ── */
+.eat-card{background:var(--surf);border:1px solid var(--brd);border-radius:var(--r-sm);padding:10px 12px;margin:8px 0}
+.eat-card .eat-label{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.04em;margin-bottom:4px}
+.eat-card ul{list-style:none;padding:0}
+.eat-card li{font-size:11px;color:var(--tx2);padding:2px 0}
+.eat-card b{color:var(--tx1)}
+
+/* ── DOCS ── */
+.docs-section{margin:24px 0;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);padding:16px}
+.docs-section h3{font-size:16px;font-weight:700}
+.docs-section>p{font-size:11px;color:var(--tx2);margin-top:2px;margin-bottom:12px}
+.docs-cat{margin-bottom:14px}
+.docs-cat:last-child{margin-bottom:0}
+.docs-cat-title{font-size:10px;font-weight:600;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.doc-item{display:block;padding:9px 12px;background:var(--bg2);border:1px solid var(--brd);border-radius:var(--r-sm);font-size:12px;color:var(--tx1);text-decoration:none;margin-bottom:4px;position:relative;transition:transform .1s}
+.doc-item::after{content:'\2192';position:absolute;right:12px;top:9px;color:var(--tx3);font-size:11px}
+.doc-item:active{transform:scale(.99)}
+.doc-item b{font-weight:600}
+.doc-item span{color:var(--tx2);font-size:11px}
+.doc-pending{color:var(--tx3)!important;font-style:italic}
+.doc-pending::after{display:none}
+
+/* ── PENDING ── */
+.pending-section{margin:24px 0;background:var(--surf);border:1px solid var(--brd);border-radius:var(--r);overflow:hidden}
+.pending-hdr{padding:14px 16px;border-bottom:1px solid var(--brd)}
+.pending-hdr h3{font-size:16px;font-weight:700}
+.pending-hdr p{font-size:11px;color:var(--tx2);margin-top:2px}
+.pend-progress{height:4px;background:var(--surf2);border-radius:2px;margin-top:8px;overflow:hidden}
+.pend-progress-fill{height:100%;background:var(--ok);border-radius:2px;transition:width .4s}
+.pend-counter{font-size:11px;color:var(--tx2);margin-top:4px}
+.pend-item{display:flex;gap:10px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--brd)}
+.pend-item:last-child{border-bottom:none}
+.pend-check{width:20px;height:20px;min-width:20px;border-radius:5px;border:2px solid var(--brd2);background:var(--surf);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s;margin-top:1px}
+.pend-check:hover{border-color:var(--ok)}
+.pend-check.checked{background:var(--ok);border-color:var(--ok)}
+.pend-check.checked::after{content:'\2713';color:#fff;font-size:11px;font-weight:700}
+.pend-content{flex:1;min-width:0}
+.pend-title{font-size:13px;font-weight:600}
+.pend-desc{font-size:11px;color:var(--tx2);margin-top:2px;line-height:1.4}
+.pend-tag{display:inline-block;font-size:10px;font-weight:600;margin-top:3px}
+.pend-urgent{color:var(--accent)}
+.pend-todo{color:var(--warn)}
+.pend-link{display:inline-block;margin-top:3px;font-size:11px;font-weight:600;color:var(--accent)}
+.pend-item.done .pend-title,.pend-item.done .pend-desc{text-decoration:line-through;opacity:.4}
+.pend-item.done .pend-tag{opacity:.3}
+
+/* ── BUDGET ── */
+.budget-bar{margin:24px 0;padding:16px;border-top:1px solid var(--brd)}
+.budget-items{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px;color:var(--tx2);margin-bottom:8px}
+.budget-cat{display:flex;align-items:center;gap:3px}
+.budget-track{display:flex;height:6px;border-radius:3px;overflow:hidden;gap:2px}
+.budget-seg{border-radius:3px;transition:width .5s}
+.budget-footer{display:flex;justify-content:space-between;font-size:10px;color:var(--tx3);margin-top:6px}
+
+/* ── BACK TO TOP ── */
+.to-top{position:fixed;bottom:calc(16px + var(--sab));right:16px;width:40px;height:40px;border-radius:50%;background:var(--surf);border:1px solid var(--brd);box-shadow:0 2px 8px rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:16px;z-index:40;opacity:0;pointer-events:none;transition:opacity .2s;color:var(--tx2)}
+.to-top.show{opacity:1;pointer-events:auto}
+.to-top:active{transform:scale(.9)}
+
+/* ── HOVER (desktop) ── */
+@media(hover:hover){
+.hl-card:hover{transform:translateY(-2px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+.hl-card:hover::after{transform:translateX(3px)}
+.doc-item:hover{transform:translateY(-1px);box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.act-card:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,0,0,.08)}
+}
+
+/* ── DARK MODE GRAIN ── */
+body.dark::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");mix-blend-mode:overlay}
+
+/* ── REDUCED MOTION ── */
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* ── PRINT ── */
+@media print{
+.hdr,.date-nav,.ctx-bar,.to-top,.progress-bar,.theme-btn,.hdr-kbd,.search-drop{display:none!important}
+body{background:#fff!important;color:#000!important}
+main{padding:0;max-width:none}
+.act-card,.pending-section,.docs-section{break-inside:avoid;margin:8px 0;box-shadow:none;border:1px solid #ddd}
+.act-body{height:auto!important}
+.act-card.open .act-body{height:auto!important}
+.hl-scroll{overflow:visible;mask-image:none;-webkit-mask-image:none}
+.hl-row{flex-wrap:wrap;width:auto}
+.hl-card{flex:0 0 45%;min-width:auto}
+a[href]::after{content:' ('attr(href)')';font-size:8px;color:#666;word-break:break-all}
+}
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<!-- HEADER -->
+<header class="hdr" id="hdr">
+<div class="hdr-left">
+<div class="hdr-title">Ciudades imperiales</div>
+<div class="hdr-sub" id="hdrCountdown">13 may - 3 jun 2026</div>
+</div>
+<div class="hdr-search-wrap">
+<span class="hdr-search-icon">&#128269;</span>
+<input class="hdr-search" id="searchInput" type="text" placeholder="buscar ciudad, lugar..." autocomplete="off" spellcheck="false" aria-label="Buscar">
+<span class="hdr-kbd" id="hdrKbd">&#8984;K</span>
+<div class="search-drop" id="searchDrop"></div>
+</div>
+<div class="hdr-actions">
+<button class="theme-btn" id="themeBtn" onclick="toggleTheme()" aria-label="Cambiar tema"><span id="themeIcon">&#127769;</span></button>
+</div>
+</header>
+
+<!-- DATE NAV -->
+<nav class="date-nav" id="dateNav"><div class="date-track" id="dateTrack">
+<a class="date-pill" data-day="1" href="#d1"><span class="dp-day">13</span><span style="font-size:8px">MI</span><span class="dp-flag">&#9992;</span></a>
+<a class="date-pill" data-day="2" href="#d2"><span class="dp-day">14</span><span style="font-size:8px">JU</span><span class="dp-flag">&#9992;</span></a>
+<a class="date-pill" data-day="3" href="#d3"><span class="dp-day">15</span><span style="font-size:8px">VI</span><span class="dp-flag">&#127463;&#127466;</span></a>
+<a class="date-pill" data-day="4" href="#d4"><span class="dp-day">16</span><span style="font-size:8px">SA</span><span class="dp-flag">&#127463;&#127466;</span></a>
+<a class="date-pill transfer" data-day="5" href="#d5"><span class="dp-day">17</span><span style="font-size:8px">DO</span><span class="dp-flag">&#128646;</span></a>
+<a class="date-pill" data-day="6" href="#d6"><span class="dp-day">18</span><span style="font-size:8px">LU</span><span class="dp-flag">&#127475;&#127473;</span></a>
+<a class="date-pill transfer" data-day="7" href="#d7"><span class="dp-day">19</span><span style="font-size:8px">MA</span><span class="dp-flag">&#128646;</span></a>
+<a class="date-pill" data-day="8" href="#d8"><span class="dp-day">20</span><span style="font-size:8px">MI</span><span class="dp-flag">&#127465;&#127466;</span></a>
+<a class="date-pill" data-day="9" href="#d9"><span class="dp-day">21</span><span style="font-size:8px">JU</span><span class="dp-flag">&#127465;&#127466;</span></a>
+<a class="date-pill" data-day="10" href="#d10"><span class="dp-day">22</span><span style="font-size:8px">VI</span><span class="dp-flag">&#127465;&#127466;</span></a>
+<a class="date-pill transfer" data-day="11" href="#d11"><span class="dp-day">23</span><span style="font-size:8px">SA</span><span class="dp-flag">&#128646;</span></a>
+<a class="date-pill" data-day="12" href="#d12"><span class="dp-day">24</span><span style="font-size:8px">DO</span><span class="dp-flag">&#127464;&#127487;</span></a>
+<a class="date-pill" data-day="13" href="#d13"><span class="dp-day">25</span><span style="font-size:8px">LU</span><span class="dp-flag">&#127464;&#127487;</span></a>
+<a class="date-pill transfer" data-day="14" href="#d14"><span class="dp-day">26</span><span style="font-size:8px">MA</span><span class="dp-flag">&#128646;</span></a>
+<a class="date-pill" data-day="15" href="#d15"><span class="dp-day">27</span><span style="font-size:8px">MI</span><span class="dp-flag">&#127462;&#127481;</span></a>
+<a class="date-pill" data-day="16" href="#d16"><span class="dp-day">28</span><span style="font-size:8px">JU</span><span class="dp-flag">&#127462;&#127481;</span></a>
+<a class="date-pill transfer" data-day="17" href="#d17"><span class="dp-day">29</span><span style="font-size:8px">VI</span><span class="dp-flag">&#128646;</span></a>
+<a class="date-pill" data-day="18" href="#d18"><span class="dp-day">30</span><span style="font-size:8px">SA</span><span class="dp-flag">&#127469;&#127482;</span></a>
+<a class="date-pill" data-day="19" href="#d19"><span class="dp-day">31</span><span style="font-size:8px">DO</span><span class="dp-flag">&#127469;&#127482;</span></a>
+<a class="date-pill" data-day="20" href="#d20"><span class="dp-day">1</span><span style="font-size:8px">LU</span><span class="dp-flag">&#127469;&#127482;</span></a>
+<a class="date-pill transfer" data-day="21" href="#d21"><span class="dp-day">2</span><span style="font-size:8px">MA</span><span class="dp-flag">&#9992;</span></a>
+<a class="date-pill" data-day="22" href="#d22"><span class="dp-day">3</span><span style="font-size:8px">MI</span><span class="dp-flag">&#9992;</span></a>
+</div></nav>
+
+<!-- CONTEXT BAR -->
+<div class="ctx-bar" id="ctxBar">
+<span class="ctx-flag" id="ctxFlag">&#127466;&#127480;</span>
+<div>
+<div class="ctx-city" id="ctxCity">En vuelo</div>
+<div class="ctx-info" id="ctxInfo">Buenos Aires &rarr; Madrid</div>
+</div>
+<div class="ctx-right">
+<span class="ctx-chip" id="ctxCurrency">&#128182; EUR</span>
+<span class="ctx-chip" id="ctxTemp">15-20&deg;C</span>
+</div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+<div class="hero-title">Ciudades imperiales</div>
+<div class="hero-date">13 mayo &mdash; 3 junio, 2026</div>
+<div class="hero-stats">8 ciudades &middot; 22 d&iacute;as &middot; 20 noches &middot; 4 vuelos &middot; 6 trenes<br><span>~USD 8.500 total estimado</span></div>
+<div class="route-wrap"><div class="route">
+<div class="route-stop"><span class="route-flag">&#127462;&#127479;</span><span class="route-city">BsAs</span></div><div class="route-line">&#9992;</div>
+<div class="route-stop"><span class="route-flag">&#127466;&#127480;</span><span class="route-city">Madrid</span></div><div class="route-line">&#9992;</div>
+<div class="route-stop"><span class="route-flag">&#127463;&#127466;</span><span class="route-city">Bruselas</span><span class="route-nights">3n</span></div><div class="route-line">&#128646;</div>
+<div class="route-stop"><span class="route-flag">&#127463;&#127466;</span><span class="route-city">Brujas</span><span class="route-nights">day trip</span></div><div class="route-line">&#128646;</div>
+<div class="route-stop"><span class="route-flag">&#127475;&#127473;</span><span class="route-city">&Aacute;msterdam</span><span class="route-nights">2n</span></div><div class="route-line">&#128646;</div>
+<div class="route-stop"><span class="route-flag">&#127465;&#127466;</span><span class="route-city">Berl&iacute;n</span><span class="route-nights">4n</span></div><div class="route-line">&#128646;</div>
+<div class="route-stop"><span class="route-flag">&#127464;&#127487;</span><span class="route-city">Praga</span><span class="route-nights">3n</span></div><div class="route-line">&#128646;</div>
+<div class="route-stop"><span class="route-flag">&#127462;&#127481;</span><span class="route-city">Viena</span><span class="route-nights">3n</span></div><div class="route-line">&#128646;</div>
+<div class="route-stop"><span class="route-flag">&#127469;&#127482;</span><span class="route-city">Budapest</span><span class="route-nights">4n</span></div><div class="route-line">&#9992;</div>
+<div class="route-stop"><span class="route-flag">&#127466;&#127480;</span><span class="route-city">Madrid</span><span class="route-nights">1n</span></div><div class="route-line">&#9992;</div>
+<div class="route-stop"><span class="route-flag">&#127462;&#127479;</span><span class="route-city">BsAs</span></div>
+</div></div>
+</section>
+
+<main>
+<div class="spine">
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 1 — Mi 13 mayo — Buenos Aires → Madrid -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d1" data-city="flight" data-flag="&#9992;" data-cityname="En vuelo" data-ctxinfo="Buenos Aires &rarr; Madrid" data-currency="&#128182; ARS/EUR" data-temp="--">
+<div class="date-label"><span class="day-num">D&iacute;a 1</span> Mi&eacute;rcoles 13 de mayo <span class="dbadge dbadge-flight">&#9992; Vuelo</span></div>
+
+<div class="transfer-card">
+<div class="tc-title">&#9992;&#65039; Buenos Aires &rarr; Madrid</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">21:40</span> <b>Ezeiza (EZE)</b> &mdash; Terminal P</div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">&#9992; Iberia IB0108 &middot; L6NG6 &middot; 11h 50m</div>
+<div class="tc-leg"><span class="tc-time">14:30</span> <b>Barajas (MAD)</b> &mdash; T4S &middot; Llega 14 mayo</div>
+</div>
+<div class="tc-detail">Reserv&oacute;: Luisina</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; $1.800 <a href="https://drive.google.com/file/d/1c-4HnMuoEMd_pPgs410Cc1ihrkfM-X8O/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<div class="note note-info">&#128161; Vuelo nocturno, 12 horas. Estar en Ezeiza a las 18:40. Llevar entretenimiento para Milo &mdash; llega 14:30 hora Madrid.</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 2 — Ju 14 mayo — Madrid → Bruselas -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d2" data-city="flight" data-flag="&#9992;" data-cityname="En vuelo" data-ctxinfo="Madrid &rarr; Bruselas" data-currency="&#128182; EUR" data-temp="15-20&deg;C">
+<div class="date-label"><span class="day-num">D&iacute;a 2</span> Jueves 14 de mayo <span class="dbadge dbadge-flight">&#9992; Conexi&oacute;n</span></div>
+
+<div class="transfer-card">
+<div class="tc-title">&#9992;&#65039; Madrid &rarr; Bruselas</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">14:30</span> Llegada Madrid T4S (IB0108)</div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">&#9203; Espera en Barajas &middot; 5h 40m</div>
+<div class="tc-leg"><span class="tc-time">20:10</span> <b>Vuelo Madrid &rarr; Bruselas</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">&#9992; Iberia IB0603 &middot; QM6VR &middot; 2h 20m</div>
+<div class="tc-leg"><span class="tc-time">22:30</span> <b>Zaventem (BRU)</b> &mdash; Terminal &uacute;nica</div>
+</div>
+<div class="tc-detail">Reserv&oacute;: Luisina</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; $513 <a href="https://drive.google.com/file/d/11zdCQWNnggCC1WYjpPh1T46XwKoGrTtq/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<div class="callout callout-crit">&#128680; Confirmar si es T4 o T4S antes de moverse. El tr&aacute;nsito entre terminales puede tomar 30 min &mdash; mal se&ntilde;alizado. Con Milo cansado del vuelo, ir con tiempo.</div>
+
+<!-- ARRIVE BRUSSELS -->
+<div class="city-arrive" id="arrive-brussels" data-city="brussels" data-flag="&#127463;&#127466;" data-cityname="Bruselas" data-ctxinfo="3 noches &middot; Airbnb Saint-Gilles" data-currency="&#128182; EUR" data-temp="15-20&deg;C">
+<h3>&#127463;&#127466; Bienvenidos a Bruselas</h3>
+<div class="ca-sub">3 noches &middot; 14 &rarr; 17 mayo &middot; Lleg&aacute;s 22:30</div>
+<div class="ca-meta">
+<span>&#128182; Euro</span>
+<span>&#127777; 15&ndash;20&deg;C</span>
+<span>&#128483; Franc&eacute;s / Flamenco</span>
+<span>UTC+2</span>
+</div>
+</div>
+
+<div class="accom-card">
+<div class="ac-name">&#127968; Airbnb Saint-Gilles</div>
+<div class="ac-addr"><a href="https://www.google.com/maps/search/?api=1&query=Chauss%C3%A9e+de+Charleroi+51B+Saint-Gilles+Bruxelles+1060" target="_blank" rel="noopener">Chauss&eacute;e de Charleroi 51B, Saint-Gilles, Bruxelles 1060</a></div>
+<div class="ac-times">Check-in: Jue 14, 16:00 &middot; Check-out: Dom 17, 11:00</div>
+<div class="ac-status ac-paid">&#10003; Pagado $541 &middot; Luisina &middot; 3 noches &middot; Host: Gautier</div>
+<a class="ac-link" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HMN49ZXM4W" target="_blank" rel="noopener">Ver en Airbnb &rarr;</a>
+</div>
+
+<div class="callout callout-return">&#8595; Taxi/Uber desde Zaventem &middot; 25-35 min &middot; 45-55&euro; &middot; Planta 0 arrivals. Llegada 22:30, de noche. Con Milo dormido, taxi directo es la mejor opci&oacute;n.</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 3 — Vi 15 mayo — Bruselas dia completo -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block city-start" id="d3" data-city="brussels">
+<div class="date-label"><span class="day-num">D&iacute;a 3</span> Viernes 15 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Bruselas &mdash; D&iacute;a &uacute;nico <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">&Uacute;nico d&iacute;a completo. 3 zonas caminables, ordenadas como ruta. Con Milo, priorizar Zona 1 y 2. Zona 3 seg&uacute;n energ&iacute;a.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona 1 &middot; Centro hist&oacute;rico &middot; Ma&ntilde;ana ~3h</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Grand+Place+Brussels" target="_blank" rel="noopener"><div class="hl-name">1. Grand Place</div><div class="hl-desc">Arrancar ac&aacute;. Coraz&oacute;n UNESCO, arquitectura barroca. Milo puede correr en la plaza.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Manneken+Pis+Brussels" target="_blank" rel="noopener"><div class="hl-name">2. Manneken Pis</div><div class="hl-desc">A 3 min de Grand Place. Foto r&aacute;pida, es chiquito.</div><span class="hl-foot">Gratis &middot; 3 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Galeries+Royales+Saint-Hubert+Brussels" target="_blank" rel="noopener"><div class="hl-name">3. Galer&iacute;as Saint-Hubert</div><div class="hl-desc">Volver a Grand Place y cruzar. 1er shopping cubierto de Europa. Chocolate.</div><span class="hl-foot">Gratis &middot; 2 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Delirium+Cafe+Brussels" target="_blank" rel="noopener"><div class="hl-name">4. Delirium Caf&eacute;</div><div class="hl-desc">Callej&oacute;n de Grand Place. +2000 cervezas. Parada para los padres.</div><span class="hl-foot">Gratis &middot; 1 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Cathedral+of+St+Michael+and+St+Gudula+Brussels" target="_blank" rel="noopener"><div class="hl-name">5. Catedral St. Michael</div><div class="hl-desc">Caminar 8 min al norte. G&oacute;tica imponente, ver por fuera alcanza.</div><span class="hl-foot">Gratis &middot; 8 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Rue+Neuve+Brussels" target="_blank" rel="noopener"><div class="hl-name">6. Rue Neuve</div><div class="hl-desc">Calle comercial principal. Solo si necesitan comprar algo.</div><span class="hl-foot">5 min</span></a>
+</div></div>
+
+<div class="slabel">Zona 2 &middot; Mont des Arts &rarr; Sablon &middot; Mediod&iacute;a ~2h</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Mont+des+Arts+Brussels" target="_blank" rel="noopener"><div class="hl-name">7. Mont des Arts</div><div class="hl-desc">Mejor mirador urbano de Bruselas. Foto obligatoria. A 10 min de Grand Place.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Musee+Magritte+Brussels" target="_blank" rel="noopener"><div class="hl-name">8. Museo Magritte</div><div class="hl-desc">Al lado del Mont des Arts. Pasar por fuera, foto a la fachada.</div><span class="hl-foot">Ver por fuera</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Musical+Instruments+Museum+Brussels" target="_blank" rel="noopener"><div class="hl-name">9. Museo Instrumentos</div><div class="hl-desc">Mismo complejo. El rooftop tiene buenas vistas &mdash; subir gratis.</div><span class="hl-foot">Ver por fuera &middot; Rooftop</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Royal+Palace+of+Brussels" target="_blank" rel="noopener"><div class="hl-name">10. Palacio Real</div><div class="hl-desc">5 min caminando. Cerrado por dentro en mayo (abre jul-sep). Solo fachada.</div><span class="hl-foot">Exterior &middot; Cerrado en mayo</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Place+du+Grand+Sablon+Brussels" target="_blank" rel="noopener"><div class="hl-name">11. Sablon</div><div class="hl-desc">Bajar 5 min. Barrio elegante, antig&uuml;edades, chocolate artesanal. Almorzar ac&aacute;.</div><span class="hl-foot">Gratis &middot; Almuerzo</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Palace+of+Justice+Brussels" target="_blank" rel="noopener"><div class="hl-name">12. Palacio de Justicia</div><div class="hl-desc">A 3 min del Sablon. Uno de los m&aacute;s grandes de Europa. Vista panor&aacute;mica.</div><span class="hl-foot">Gratis &middot; 3 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Marche+aux+Puces+Place+du+Jeu+de+Balle+Brussels" target="_blank" rel="noopener"><div class="hl-name">13. Mercado de Pulgas</div><div class="hl-desc">Bajar 5 min desde Justicia. Viernes cierra 14:00. Ir temprano o saltear.</div><span class="hl-foot">Gratis &middot; Cierra 14:00</span></a>
+</div></div>
+
+<div class="slabel">Zona 3 &middot; Si hay energ&iacute;a &middot; Tarde (elegir una)</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=European+Parliament+Brussels" target="_blank" rel="noopener"><div class="hl-name">Parlamento Europeo</div><div class="hl-desc">Metro Maelbeek. Edificio imponente por fuera. Entrar solo con visita guiada reservada.</div><span class="hl-foot">Ver por fuera</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Parc+du+Cinquantenaire+Brussels" target="_blank" rel="noopener"><div class="hl-name">Cinquantenaire</div><div class="hl-desc">Junto al Parlamento. Parque grande, arco monumental. Milo puede jugar.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Autoworld+Brussels+Cinquantenaire" target="_blank" rel="noopener"><div class="hl-name">Autoworld</div><div class="hl-desc">Dentro del Cinquantenaire. Autos hist&oacute;ricos &mdash; Milo puede disfrutar si le gustan.</div><span class="hl-foot">~&euro;13 &middot; Si hay tiempo</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Brussels+Comic+Book+Route" target="_blank" rel="noopener"><div class="hl-name">Ruta del C&oacute;mic</div><div class="hl-desc">Alternativa: volver al centro y buscar murales callejeros. Se cruzan caminando.</div><span class="hl-foot">Gratis &middot; Por todo el centro</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Le+Botanique+Brussels" target="_blank" rel="noopener"><div class="hl-name">Jard&iacute;n Bot&aacute;nico</div><div class="hl-desc">Norte de la ciudad. Tranquilo si Milo necesita un rato verde.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+
+<div class="note note-info">&#128161; Moneda: Euro (&euro;). Metro eficiente. Chocolate local mucho m&aacute;s barato que en aeropuerto. Viernes 15: mercado de pulgas cierra 14:00.</div>
+
+<div class="eat-card">
+<div class="eat-label">&#127860; D&oacute;nde comer en Bruselas</div>
+<ul>
+<li><b>Sablon</b> para almuerzo elegante (&euro;15&ndash;25)</li>
+<li><b>Fin de Si&egrave;cle</b> &mdash; Belga cl&aacute;sico, &euro;12&ndash;18</li>
+<li><b>Maison Dandoy</b> &mdash; Waffles en Grand Place</li>
+<li>Frites: cualquier frituur callejero &mdash; las mejores del mundo y Milo las ama</li>
+<li><b>Evitar</b> Rue des Bouchers (trampa tur&iacute;stica)</li>
+</ul>
+</div>
+
+<div class="callout callout-warn">&#9889; <b>Ma&ntilde;ana tren 08:22.</b> Eurostar a &Aacute;msterdam &mdash; estar en Midi a las 08:00. Preparar valijas esta noche. Checkout 11:00 pero irse a las 07:00.</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 4 — Sa 16 mayo — Day trip Brujas -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d4" data-city="brussels">
+<div class="date-label"><span class="day-num">D&iacute;a 4</span> S&aacute;bado 16 de mayo <span class="dbadge dbadge-daytrip">&#128646; Day trip</span></div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Day trip a Brujas &#127463;&#127466; <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Imperdibles: Minnewater, Markt + Burg, paseo en barca. Recorrido sur&rarr;norte, ~6 km caminables.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">&#128646; Ida &mdash; Bruselas &rarr; Brujas</div>
+<div class="transfer-card" style="border-left-color:var(--info)">
+<div class="tc-title" style="color:var(--info)">&#128646; Bruselas Midi &rarr; Brujas</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">~08:00</span> <b>Bruselas Midi</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">IC directo SNCB &middot; ~1h</div>
+<div class="tc-leg"><span class="tc-time">~09:00</span> <b>Brugge Station</b></div>
+</div>
+<div class="tc-booking" style="color:var(--tx2)">Comprar en estaci&oacute;n o app SNCB &middot; ~&euro;16 ida y vuelta &middot; Tarifa Weekend (50% off s&aacute;bados)</div>
+</div>
+
+<div class="slabel">Zona 1 &middot; Sur &mdash; Estaci&oacute;n &rarr; Begijnhof &rarr; Cervecer&iacute;a (9:15&ndash;11:15)</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Minnewater+Park+Bruges" target="_blank" rel="noopener"><div class="hl-name">Minnewater &#11088;</div><div class="hl-desc">El "Lago del Amor". Cisnes blancos, puente medieval, jardines. A 5 min de la estaci&oacute;n.</div><span class="hl-foot">Gratis &middot; 15 min &middot; Imperdible</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Begijnhof+Bruges" target="_blank" rel="noopener"><div class="hl-name">Begijnhof &#11088;</div><div class="hl-desc">Recinto UNESCO del s. XIII. Casas blancas, patio con narcisos en mayo, silencio mon&aacute;stico.</div><span class="hl-foot">Gratis &middot; 20 min &middot; UNESCO</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Brouwerij+De+Halve+Maan+Bruges" target="_blank" rel="noopener"><div class="hl-name">Halve Maan &#11088;</div><div class="hl-desc">&Uacute;nica cervecer&iacute;a activa en el centro (desde 1856). Tour 45 min con cata de Brugse Zot + terraza.</div><span class="hl-foot">&euro;14 con cata &middot; 45 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Bonifaciusbrug+Bruges" target="_blank" rel="noopener"><div class="hl-name">Puente Bonifacio</div><div class="hl-desc">El puente m&aacute;s pintoresco de Brujas. Piedra, hiedra, canal. Foto obligada.</div><span class="hl-foot">Gratis &middot; 5 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Onze-Lieve-Vrouwekerk+Bruges" target="_blank" rel="noopener"><div class="hl-name">Iglesia Ntra. Se&ntilde;ora &#11088;</div><div class="hl-desc">Torre de 115 m. Adentro: la Madonna de Miguel &Aacute;ngel &mdash; la &uacute;nica que sali&oacute; de Italia en vida.</div><span class="hl-foot">Iglesia gratis &middot; Museo &euro;7</span></a>
+</div></div>
+
+<div class="slabel">Zona 2 &middot; Centro &mdash; Markt &middot; Burg &middot; Canales (11:15&ndash;15:00)</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Markt+Bruges+Belgium" target="_blank" rel="noopener"><div class="hl-name">Markt (Plaza Mayor) &#11088;</div><div class="hl-desc">Palacios gremiales coloridos, casas escalonadas, coches de caballos.</div><span class="hl-foot">Gratis &middot; 20 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Belfry+of+Bruges" target="_blank" rel="noopener"><div class="hl-name">Belfort &#11088;</div><div class="hl-desc">Torre campanario, 83 m, vistas 360&deg;. 366 escalones sin ascensor. Capacidad limitada.</div><span class="hl-foot">&euro;14 &middot; 30 min &middot; Reservar online</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Basilica+Holy+Blood+Bruges" target="_blank" rel="noopener"><div class="hl-name">Plaza Burg + Bas&iacute;lica &#11088;</div><div class="hl-desc">A 1 cuadra de Markt. Ayuntamiento g&oacute;tico (1376) + Bas&iacute;lica de la Sangre Santa.</div><span class="hl-foot">Gratis &middot; 20 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Rozenhoedkaai+Bruges" target="_blank" rel="noopener"><div class="hl-name">Rozenhoedkaai &#11088;</div><div class="hl-desc">LA postal de Brujas. Canal, edificios medievales reflejados en el agua.</div><span class="hl-foot">Gratis &middot; La foto del viaje</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Bruges+Canal+Boat+Tour+Rozenhoedkaai" target="_blank" rel="noopener"><div class="hl-name">Paseo en barca &#11088;</div><div class="hl-desc">30 min por los canales. Milo la va a disfrutar. Efectivo &mdash; no todas aceptan tarjeta.</div><span class="hl-foot">&euro;12/persona &middot; 30 min</span></a>
+</div></div>
+
+<div class="note note-info">&#127860; <b>Almuerzo ~13:00:</b> Evitar restaurantes sobre Markt (trampa tur&iacute;stica). Ir a Sint-Amandsstraat o Philipstockstraat (&euro;12&ndash;18). R&aacute;pido: <b>The Potato Bar</b> o <b>Chez Albert</b> para waffles (&euro;5&ndash;8).</div>
+
+<div class="slabel">Zona 3 &middot; Norte &mdash; Chocolate &middot; Catedral &middot; Cena (15:00&ndash;18:30)</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=The+Chocolate+Line+Bruges" target="_blank" rel="noopener"><div class="hl-name">The Chocolate Line &#11088;</div><div class="hl-desc">Dominique Persoone, el chocolatero m&aacute;s famoso de B&eacute;lgica. Sabores experimentales.</div><span class="hl-foot">Simon Stevinplein 19 &middot; Degustaci&oacute;n gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Sint-Salvatorskathedraal+Bruges" target="_blank" rel="noopener"><div class="hl-name">Catedral San Salvador</div><div class="hl-desc">La iglesia m&aacute;s antigua de Brujas (s. XII). Austera por fuera, sorprende por dentro.</div><span class="hl-foot">Gratis &middot; 15 min</span></a>
+</div></div>
+
+<div class="note note-info">&#127860; <b>Cena ~17:30:</b> <b>De Stove</b> (cocina belga &iacute;ntima, reservar) o <b>That's Toast</b> (casual, ideal con Milo). Cerveza: <b>'t Brugs Beertje</b> (300 cervezas belgas).</div>
+
+<div class="slabel">&#128646; Vuelta &mdash; Brujas &rarr; Bruselas</div>
+<div class="transfer-card" style="border-left-color:var(--info)">
+<div class="tc-title" style="color:var(--info)">&#128646; Brujas &rarr; Bruselas</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">~19:00</span> <b>Brugge Station</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">IC directo SNCB &middot; ~1h</div>
+<div class="tc-leg"><span class="tc-time">~20:00</span> <b>Bruselas Midi</b></div>
+</div>
+</div>
+
+</div></div>
+</div>
+
+<div class="callout callout-return">&#127968; Volv&eacute;s a dormir al Airbnb de Bruselas (Saint-Gilles). &Uacute;ltimo checkout ma&ntilde;ana 11:00 &mdash; pero sal&iacute;s 07:00.</div>
+<div class="callout callout-crit">&#128680; Preparar valijas ESTA NOCHE. Ma&ntilde;ana el Eurostar sale 08:22 y ten&eacute;s que estar en Midi a las 08:00.</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 5 — Do 17 mayo — Bruselas → Ámsterdam -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d5" data-city="amsterdam" data-flag="&#127475;&#127473;" data-cityname="&Aacute;msterdam" data-ctxinfo="2 noches &middot; Hotel Euphemia" data-currency="&#128182; EUR" data-temp="12-18&deg;C">
+<div class="date-label"><span class="day-num">D&iacute;a 5</span> Domingo 17 de mayo <span class="dbadge dbadge-train">&#128646; Traslado</span> <span class="dbadge dbadge-half">&frac12; d&iacute;a</span></div>
+
+<div class="city-depart">
+<div class="cd-title">&uarr; Salir de Bruselas</div>
+<p>Taxi/Uber a Midi &middot; 5-7 min &middot; 10-15&euro; &middot; Tram 81/82 alternativa &middot; Tren 08:22, estar 08:02</p>
+</div>
+
+<div class="transfer-card">
+<div class="tc-title">&#128646; Bruselas &rarr; &Aacute;msterdam</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">08:22</span> <b>Bruselas Midi</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">Eurostar 9305 &middot; K4YNTJ &middot; 1h 58m</div>
+<div class="tc-leg"><span class="tc-time">10:20</span> <b>Amsterdam Centraal</b></div>
+</div>
+<div class="tc-detail">Coach 18 &middot; Seats 23, 24, 28 &middot; Reserv&oacute;: Luisina</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; $113 <a href="https://drive.google.com/file/d/1ZwQ2ljEHoNorrjEpBGi5rh0SGbfOXb5c/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<!-- ARRIVE AMSTERDAM -->
+<div class="city-arrive" id="arrive-amsterdam" data-city="amsterdam" data-flag="&#127475;&#127473;" data-cityname="&Aacute;msterdam" data-ctxinfo="2 noches &middot; Hotel Euphemia" data-currency="&#128182; EUR" data-temp="12-18&deg;C">
+<h3>&#127475;&#127473; Bienvenidos a &Aacute;msterdam</h3>
+<div class="ca-sub">2 noches &middot; 17 &rarr; 19 mayo &middot; Lleg&aacute;s 10:20</div>
+<div class="ca-meta">
+<span>&#128182; Euro</span>
+<span>&#127777; 12&ndash;18&deg;C</span>
+<span>&#128483; Neerland&eacute;s</span>
+<span>Bike-friendly</span>
+</div>
+</div>
+
+<div class="accom-card">
+<div class="ac-name">&#127968; Hotel Euphemia</div>
+<div class="ac-addr"><a href="https://www.google.com/maps/search/?api=1&query=Fokke+Simonszstraat+1+1017+TD+Amsterdam" target="_blank" rel="noopener">Fokke Simonszstraat 1, 1017 TD &Aacute;msterdam</a></div>
+<div class="ac-times">Check-in: desde 14:00 &middot; Check-out: hasta 10:00 &middot; Recepci&oacute;n 08-23h</div>
+<div class="ac-status ac-pending">&#9203; Total $388 (parcial $184.30 pagado &middot; resto en hotel) &middot; 2 noches</div>
+<a class="ac-link" href="https://drive.google.com/file/d/1p7NaROdeH2cD8gbIUGfMQ08Fdtsj_WNZ/view" target="_blank" rel="noopener">Ver reserva &rarr;</a>
+</div>
+
+<div class="callout callout-return">&darr; Tram 7 desde Centraal &middot; 15 min &middot; 3.40&euro; &middot; Check-in desde 14:00. Milo gratis en tram.</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Tarde libre &mdash; Zona Centro <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Lleg&aacute;s ~10:30. Dej&aacute;s valijas y medio d&iacute;a disponible.</div>
+<div class="act-body"><div class="act-inner">
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Amsterdam+Centraal+Station" target="_blank" rel="noopener"><div class="hl-name">Estaci&oacute;n Central</div><div class="hl-desc">Punto de llegada. Arquitectura neog&oacute;tica &mdash; foto de bienvenida.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Dam+Square+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Dam Square</div><div class="hl-desc">Centro hist&oacute;rico. Foto con el Palacio Real de fondo.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Royal+Palace+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Palacio Real</div><div class="hl-desc">En Dam Square. Ver desde fuera es suficiente.</div><span class="hl-foot">Ver por fuera</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Nieuwmarkt+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Nieuwmarkt</div><div class="hl-desc">Plaza medieval con ambiente local, menos tur&iacute;stica que Dam.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Oude+Kerk+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Oude Kerk</div><div class="hl-desc">Iglesia m&aacute;s antigua, en el Red Light District. Ver por fuera.</div><span class="hl-foot">~&euro;13 &middot; Si hay tiempo</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Red+Light+District+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Red Light District</div><div class="hl-desc">De d&iacute;a es tranquilo y educativo. De noche: sin Milo.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Bloemenmarkt+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Bloemenmarkt</div><div class="hl-desc">&Uacute;nico mercado de flores sobre el canal. Milo va a ver los colores.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=De+Negen+Straatjes+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">9 Streets</div><div class="hl-desc">9 calles con caf&eacute;s locales, tiendas y galer&iacute;as. El &Aacute;msterdam m&aacute;s tranquilo.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Grachtengordel+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Canales</div><div class="hl-desc">Caminar a lo largo de los canales es gratis y mejor que cualquier tour.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+<div class="callout callout-warn">&#9889; Elegir UN museo y reservar ya: <b>Van Gogh</b> (1.5h, mejor con Milo) o <b>Rijksmuseum</b> (3h+). Ambos se agotan semanas antes.</div>
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 6 — Lu 18 mayo — Ámsterdam completo -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block city-start" id="d6" data-city="amsterdam">
+<div class="date-label"><span class="day-num">D&iacute;a 6</span> Lunes 18 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">&Aacute;msterdam &mdash; D&iacute;a completo <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">D&iacute;a principal. Elegir Rijksmuseum o Van Gogh (no ambos con Milo). Jordaan + Vondelpark.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona Museos + Jordaan</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Westerkerk+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Westerkerk</div><div class="hl-desc">Torre m&aacute;s alta de &Aacute;msterdam. Junto al Jordaan.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Rijksmuseum+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Rijksmuseum</div><div class="hl-desc">"La Ronda de Noche" de Rembrandt. Grande (3h+) &mdash; con Milo evaluar.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Van+Gogh+Museum+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Museo Van Gogh</div><div class="hl-desc">La colecci&oacute;n m&aacute;s grande del mundo. M&aacute;s compacto (1.5h) &mdash; mejor con Milo.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Rembrandt+House+Museum+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Casa Rembrandt</div><div class="hl-desc">La casa donde vivi&oacute; Rembrandt. 1h de visita. De paso si eligen Rijks.</div><span class="hl-foot">Opcional</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Jordaan+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Barrio Jordaan</div><div class="hl-desc">El barrio m&aacute;s encantador. Caf&eacute;s "marr&oacute;n", canales tranquilos.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Begijnhof+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Begijnhof</div><div class="hl-desc">Patio medieval secreto en pleno centro. Milo puede correr en el c&eacute;sped.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Vondelpark+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Vondelpark</div><div class="hl-desc">El parque de &Aacute;msterdam. Ardillas, patos, cafeter&iacute;as. Pausa ideal.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Albert+Cuyp+Market+Amsterdam" target="_blank" rel="noopener"><div class="hl-name">Mercado Albert Cuyp</div><div class="hl-desc">Mercado callejero m&aacute;s grande. Stroopwafels calientes. Milo va a pedir m&aacute;s.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+
+<div class="note note-info">&#128161; Ferry IJ: sale gratis desde la parte trasera de Centraal Station. Cruzar el canal IJ en 15 min &mdash; con Milo es un plan en s&iacute; mismo.</div>
+
+<div class="eat-card">
+<div class="eat-label">&#127860; D&oacute;nde comer en &Aacute;msterdam</div>
+<ul>
+<li><b>Albert Cuypmarkt</b> &mdash; Stroopwafels, haring, kibbling</li>
+<li><b>Foodhallen</b> &mdash; Food court en De Hallen. Variedad.</li>
+<li>Pannenkoeken (panqueques holandeses) &mdash; Milo los ama</li>
+<li>Indonesian rijsttafel &mdash; platos para compartir, Milo come arroz</li>
+<li>Bitterballen en cualquier caf&eacute; marr&oacute;n. Jordaan para cena (&euro;15-20)</li>
+</ul>
+</div>
+
+<div class="callout callout-warn">&#9889; <b>Ma&ntilde;ana tren 08:00.</b> ICE a Berl&iacute;n, 5h42. Irse del hotel a las 06:45. Pagar resto del hotel esta noche. Preparar entretenimiento para Milo.</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 7 — Ma 19 mayo — Ámsterdam → Berlín -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d7" data-city="berlin" data-flag="&#127465;&#127466;" data-cityname="Berl&iacute;n" data-ctxinfo="4 noches &middot; Airbnb Moabit" data-currency="&#128182; EUR" data-temp="11-21&deg;C">
+<div class="date-label"><span class="day-num">D&iacute;a 7</span> Martes 19 de mayo <span class="dbadge dbadge-train">&#128646; Traslado</span> <span class="dbadge dbadge-half">&frac12; d&iacute;a</span></div>
+
+<div class="city-depart">
+<div class="cd-title">&uarr; Salir de &Aacute;msterdam</div>
+<p>Taxi/Uber a Centraal &middot; 10 min &middot; 15&euro; &middot; Checkout 10:00 pero salir 06:45. Avisar recepci&oacute;n noche antes.</p>
+</div>
+
+<div class="transfer-card">
+<div class="tc-title">&#128646; &Aacute;msterdam &rarr; Berl&iacute;n</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">08:00</span> <b>Amsterdam Centraal</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">DB ICE 143 &middot; 1ra Clase &middot; 5h 42m</div>
+<div class="tc-leg"><span class="tc-time">13:42</span> <b>Berlin Hauptbahnhof</b></div>
+</div>
+<div class="tc-detail">Coach 28, Seats 13/15/16 &middot; Ticket 3JW7983P &middot; Res. 808670184206 &middot; Reserv&oacute;: Luisina</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; $182 <a href="https://drive.google.com/file/d/12hSBADAZDV8BTakYmk5yJDR3Nf2w8Y5d/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<!-- ARRIVE BERLIN -->
+<div class="city-arrive" id="arrive-berlin" data-city="berlin" data-flag="&#127465;&#127466;" data-cityname="Berl&iacute;n" data-ctxinfo="4 noches &middot; Airbnb Moabit" data-currency="&#128182; EUR" data-temp="11-21&deg;C">
+<h3>&#127465;&#127466; Bienvenidos a Berl&iacute;n</h3>
+<div class="ca-sub">4 noches &middot; 19 &rarr; 23 mayo &middot; Lleg&aacute;s 13:42</div>
+<div class="ca-meta">
+<span>&#128182; Euro</span>
+<span>&#127777; 11&ndash;21&deg;C</span>
+<span>&#128483; Alem&aacute;n</span>
+<span>Mucho gratis</span>
+</div>
+</div>
+
+<div class="accom-card">
+<div class="ac-name">&#127968; Airbnb Moabit</div>
+<div class="ac-addr"><a href="https://www.google.com/maps/search/?api=1&query=Essener+Stra%C3%9Fe+13+Berlin+10555" target="_blank" rel="noopener">Essener Stra&szlig;e 13, Berlin 10555</a></div>
+<div class="ac-times">Check-in: Mar 19, 16:00 &middot; Check-out: S&aacute;b 23, 11:00</div>
+<div class="ac-status ac-paid">&#10003; Pagado $603 &middot; 4 noches &middot; Host: Thomas &middot; Key safe: 9594 &middot; Apt I, PB derecha &middot; City tax &euro;37,35 en efectivo</div>
+<a class="ac-link" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HMJPASYEFD" target="_blank" rel="noopener">Ver en Airbnb &rarr;</a>
+</div>
+
+<div class="callout callout-return">&darr; Caminar desde Hbf &middot; 18 min &middot; Gratis (salida norte, Europaplatz). Check-in 16:00, key safe 9594.</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Tarde &mdash; Reichstag 18:30 <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Check-in, descansar, y a las 18:30 tour guiado del Bundestag en espa&ntilde;ol. Reservado.</div>
+<div class="act-body"><div class="act-inner">
+<div class="transfer-card" style="border-left-color:var(--ok)">
+<div class="tc-title" style="color:var(--ok)">&#127963; Reichstag &mdash; Tour guiado</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">18:30</span> <b>Welcome Centre, Scheidemannstra&szlig;e</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">Tour guiado en espa&ntilde;ol &middot; 90 min &middot; 3 pax &middot; Gratis</div>
+<div class="tc-leg"><span class="tc-time">~20:00</span> <b>Incluye visita a la c&uacute;pula</b></div>
+</div>
+<div class="tc-detail">Booking: Hei-20260324-155537 &middot; Presentarse 18:00 (30 min antes) &middot; Llevar pasaporte</div>
+<div class="tc-booking confirmed">&#10003; Confirmado BA-20260324-003113-490 <a href="https://drive.google.com/file/d/19AsI4nxmWwB47QRnQHylEYv528xLs156/view" target="_blank" rel="noopener">Ver confirmaci&oacute;n &rarr;</a></div>
+</div>
+<div class="note note-info">&#128161; Transporte: ticket 7 d&iacute;as BVG es lo m&aacute;s conveniente para 4 noches (U-Bahn, S-Bahn, tranv&iacute;a). Milo viaja gratis hasta los 6 a&ntilde;os.</div>
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 8 — Mi 20 mayo — Berlín Historia -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d8" data-city="berlin">
+<div class="date-label"><span class="day-num">D&iacute;a 8</span> Mi&eacute;rcoles 20 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Berl&iacute;n &mdash; Historia <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Imperdibles: Puerta de Brandeburgo, Memorial del Holocausto. Circuito caminable ~4 km.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona Brandeburgo &rarr; Mitte &middot; Circuito hist&oacute;rico</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Brandenburg+Gate+Berlin" target="_blank" rel="noopener"><div class="hl-name">Puerta de Brandeburgo</div><div class="hl-desc">El s&iacute;mbolo m&aacute;s reconocido de Berl&iacute;n. Ver de d&iacute;a y de noche.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Reichstag+Building+Berlin" target="_blank" rel="noopener"><div class="hl-name">Reichstag</div><div class="hl-desc">Visitado ayer con tour guiado. Pasar por fuera para foto diurna.</div><span class="hl-foot">&#10003; Visitado Day 7</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Memorial+to+the+Murdered+Jews+of+Europe+Berlin" target="_blank" rel="noopener"><div class="hl-name">Memorial del Holocausto</div><div class="hl-desc">2.711 estelas de concreto. Milo puede caminar entre ellas. Impacto real.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Checkpoint+Charlie+Berlin" target="_blank" rel="noopener"><div class="hl-name">Checkpoint Charlie</div><div class="hl-desc">Puesto fronterizo m&aacute;s famoso de la Guerra Fr&iacute;a. 10 min.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Topography+of+Terror+Berlin" target="_blank" rel="noopener"><div class="hl-name">Topograf&iacute;a del Terror</div><div class="hl-desc">Museo sobre ruinas de la Gestapo. Gratuito, 2h. Con Milo: uno entra.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Potsdamer+Platz+Berlin" target="_blank" rel="noopener"><div class="hl-name">Potsdamer Platz</div><div class="hl-desc">Plaza moderna donde estaba el muro. Sony Center para pausa.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+
+<div class="eat-card">
+<div class="eat-label">&#127860; D&oacute;nde comer en Berl&iacute;n</div>
+<ul>
+<li>D&ouml;ner kebab en Kreuzberg (&euro;4-6, el mejor del mundo)</li>
+<li>Currywurst en <b>Curry 36</b> (Mehringdamm)</li>
+<li>Almuerzo: zona Hackescher Markt (&euro;10-15)</li>
+<li>Pretzels calientes en la calle para Milo</li>
+</ul>
+</div>
+
+<div class="note note-info">&#128161; Pausa sugerida: Despu&eacute;s del Memorial y Checkpoint, parar en Potsdamer Platz &mdash; helader&iacute;as y bancos cubiertos en el Sony Center.</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 9 — Ju 21 mayo — Berlín Museos y Muro -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d9" data-city="berlin">
+<div class="date-label"><span class="day-num">D&iacute;a 9</span> Jueves 21 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Berl&iacute;n &mdash; Museos y Muro <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Imperdibles: Isla de los Museos, East Side Gallery. D&iacute;a intenso.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona Museos + Este</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Museum+Island+Berlin" target="_blank" rel="noopener"><div class="hl-name">Isla de los Museos</div><div class="hl-desc">5 museos en una isla. P&eacute;rgamo cerrado parcialmente. Elegir uno y reservar.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=East+Side+Gallery+Berlin" target="_blank" rel="noopener"><div class="hl-name">East Side Gallery</div><div class="hl-desc">1.3 km de Muro pintado. Ver "El Beso" de Breznev. Milo puede correr.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Berliner+Fernsehturm" target="_blank" rel="noopener"><div class="hl-name">Torre de TV</div><div class="hl-desc">368m, la vista m&aacute;s alta desde Alexanderplatz. Reservar online.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Jewish+Museum+Berlin" target="_blank" rel="noopener"><div class="hl-name">Museo Jud&iacute;o</div><div class="hl-desc">Arquitectura de Libeskind. Con Milo: jardines y pasillos.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Charlottenburg+Palace+Berlin" target="_blank" rel="noopener"><div class="hl-name">Palacio Charlottenburg</div><div class="hl-desc">Residencia prusiana con jardines enormes. Jardines gratis.</div><span class="hl-foot">Jardines gratis</span></a>
+</div></div>
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 10 — Vi 22 mayo — Berlín Barrios -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d10" data-city="berlin">
+<div class="date-label"><span class="day-num">D&iacute;a 10</span> Viernes 22 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Berl&iacute;n &mdash; Barrios <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Imperdibles: Tempelhof (Milo corre libre), Gendarmenmarkt. D&iacute;a relajado.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona Barrios &middot; Kreuzberg, Tempelhof y arte</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Kreuzberg+Berlin" target="_blank" rel="noopener"><div class="hl-name">Kreuzberg</div><div class="hl-desc">Barrio alternativo. D&ouml;ner kebab genuino, T&uuml;rkenmarkt (mar/vie).</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Tempelhofer+Feld+Berlin" target="_blank" rel="noopener"><div class="hl-name">Tempelhof Park</div><div class="hl-desc">Ex-aeropuerto nazi convertido en parque. Pistas de aterrizaje para bicis y Milo.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Gendarmenmarkt+Berlin" target="_blank" rel="noopener"><div class="hl-name">Gendarmenmarkt</div><div class="hl-desc">La plaza m&aacute;s elegante: dos catedrales sim&eacute;tricas.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Hackescher+Markt+Berlin" target="_blank" rel="noopener"><div class="hl-name">Hackescher Markt</div><div class="hl-desc">Galer&iacute;as y tiendas en patios hist&oacute;ricos. Trendy.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Mauerpark+Berlin" target="_blank" rel="noopener"><div class="hl-name">Mauerpark</div><div class="hl-desc">Solo domingos: mercado de pulgas + karaoke al aire libre.</div><span class="hl-foot">Gratis &middot; Solo domingos</span></a>
+</div></div>
+
+<div class="callout callout-warn">&#9889; <b>Ma&ntilde;ana tren 09:28.</b> &#268;D a Praga, casi 4 horas. Checkout 11:00 pero irse ~09:00. Key safe: dejar llave adentro. City tax &euro;37,35 en efectivo &mdash; pagar hoy.</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 11 — Sa 23 mayo — Berlín → Praga -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d11" data-city="prague" data-flag="&#127464;&#127487;" data-cityname="Praga" data-ctxinfo="3 noches &middot; Airbnb Vinohrady" data-currency="CZK" data-temp="14-21&deg;C">
+<div class="date-label"><span class="day-num">D&iacute;a 11</span> S&aacute;bado 23 de mayo <span class="dbadge dbadge-train">&#128646; Traslado</span></div>
+
+<div class="city-depart">
+<div class="cd-title">&uarr; Salir de Berl&iacute;n</div>
+<p>Caminar al Hbf &middot; 18 min &middot; Gratis. Salir ~09:00 con valijas.</p>
+</div>
+
+<div class="transfer-card">
+<div class="tc-title">&#128646; Berl&iacute;n &rarr; Praga</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">09:28</span> <b>Berlin Hbf</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">&#268;D rj 173 &middot; 3h 57m</div>
+<div class="tc-leg"><span class="tc-time">13:25</span> <b>Praha hlavn&iacute; n&aacute;dra&#382;&iacute;</b></div>
+</div>
+<div class="tc-detail">Coach 259, Seats 73/74/77 &middot; Ref WKF81M &middot; First Minute Europe &middot; Reserv&oacute;: Luisina</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; $137 <a href="https://drive.google.com/file/d/1_yj-Rc4GA18dZDjg1Avy5iS_-jugO_YC/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<!-- ARRIVE PRAGUE -->
+<div class="city-arrive" id="arrive-prague" data-city="prague" data-flag="&#127464;&#127487;" data-cityname="Praga" data-ctxinfo="3 noches &middot; Airbnb Vinohrady" data-currency="CZK" data-temp="14-21&deg;C">
+<h3>&#127464;&#127487; Bienvenidos a Praga</h3>
+<div class="ca-sub">3 noches &middot; 23 &rarr; 26 mayo &middot; Lleg&aacute;s 13:25</div>
+<div class="ca-meta">
+<span>&#128176; Corona Checa (CZK)</span>
+<span>&#127777; 14&ndash;21&deg;C</span>
+<span>&#128483; Checo</span>
+<span>Muy econ&oacute;mica</span>
+</div>
+</div>
+
+<div class="accom-card">
+<div class="ac-name">&#127968; Airbnb Vinohrady</div>
+<div class="ac-addr"><a href="https://www.google.com/maps/search/?api=1&query=Z%C3%A1h%C5%99ebsk%C3%A1+264%2F9+Praha+2+120+00" target="_blank" rel="noopener">Z&aacute;h&#345;ebsk&aacute; 264/9, Praha 2, 120 00</a></div>
+<div class="ac-times">Check-in: S&aacute;b 23, 14:00 &middot; Check-out: Mar 26, 11:00</div>
+<div class="ac-status ac-pending">&#9203; Pago al cierre $498 &middot; Reserv&oacute;: Pali &middot; 3 noches &middot; Host: Sophia</div>
+<a class="ac-link" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HMYMZ4CTH2" target="_blank" rel="noopener">Ver en Airbnb &rarr;</a>
+</div>
+
+<div class="callout callout-return">&darr; Caminar 11 min &middot; Gratis (o Bolt 4-7&euro;). Mejor timing del viaje: solo 35 min al check-in.</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Tarde &mdash; Ciudad Vieja <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Puente Carlos, Reloj Astron&oacute;mico, Isla Kampa.</div>
+<div class="act-body"><div class="act-inner">
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Charles+Bridge+Prague" target="_blank" rel="noopener"><div class="hl-name">Puente Carlos</div><div class="hl-desc">Cruzar al atardecer (luz dorada). 30 estatuas barrocas. Milo cuenta las figuras.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Prague+Astronomical+Clock" target="_blank" rel="noopener"><div class="hl-name">Reloj Astron&oacute;mico</div><div class="hl-desc">Show del reloj cada hora en punto (60 seg). Milo lo va a amar.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Kampa+Island+Prague" target="_blank" rel="noopener"><div class="hl-name">Isla Kampa</div><div class="hl-desc">Isla tranquila bajo el Puente Carlos. Esculturas de &#268;ern&yacute;. Milo puede explorar.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+<div class="note note-info">&#128161; Corona Checa: 1&euro; &#8776; 25 CZK. Cambiar en casas de cambio de calles secundarias (sin comisi&oacute;n visible). Nunca en quioscos tur&iacute;sticos.</div>
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 12 — Do 24 mayo — Praga Castillo -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d12" data-city="prague">
+<div class="date-label"><span class="day-num">D&iacute;a 12</span> Domingo 24 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Praga &mdash; Castillo <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Imperdibles: Castillo de Praga (medio d&iacute;a), Mal&aacute; Strana. Si hay tiempo: Josefov, Dancing House.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona Castillo + Josefov</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Prague+Castle" target="_blank" rel="noopener"><div class="hl-name">Castillo de Praga</div><div class="hl-desc">Catedral, palacio real y Callej&oacute;n del Oro (casas mini que Milo va a explorar). Medio d&iacute;a.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Jewish+Quarter+Prague+Josefov" target="_blank" rel="noopener"><div class="hl-name">Barrio Jud&iacute;o Josefov</div><div class="hl-desc">Cementerio con 12.000 l&aacute;pidas + Sinagoga Espa&ntilde;ola. Hist&oacute;rico.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Mala+Strana+Prague" target="_blank" rel="noopener"><div class="hl-name">Mal&aacute; Strana</div><div class="hl-desc">Barrio barroco al pie del Castillo. Calles empedradas, jardines abiertos en mayo.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Dancing+House+Prague" target="_blank" rel="noopener"><div class="hl-name">Dancing House</div><div class="hl-desc">Edificio de Gehry sin &aacute;ngulos rectos. Bar del techo con vistas al Moldava.</div><span class="hl-foot">Ver por fuera</span></a>
+</div></div>
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 13 — Lu 25 mayo — Praga Miradores -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d13" data-city="prague">
+<div class="date-label"><span class="day-num">D&iacute;a 13</span> Lunes 25 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Praga &mdash; Miradores <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Imperdibles: Colina Pet&#345;&iacute;n, Parque Letn&aacute;. Si hay tiempo: Clementinum, Lennon Wall.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona Miradores &middot; Pet&#345;&iacute;n, Letn&aacute; y Vy&scaron;ehrad</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Petrin+Hill+Prague" target="_blank" rel="noopener"><div class="hl-name">Colina Pet&#345;&iacute;n</div><div class="hl-desc">Vistas panor&aacute;micas. Subir en funicular desde Mal&aacute; Strana. Milo va a amar el funicular.</div><span class="hl-foot">Gratis parque</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Klementinum+Prague" target="_blank" rel="noopener"><div class="hl-name">Clementinum</div><div class="hl-desc">Biblioteca barroca de 300 a&ntilde;os, 10-12 personas por turno. Reservar ya.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Letna+Park+Prague" target="_blank" rel="noopener"><div class="hl-name">Parque Letn&aacute;</div><div class="hl-desc">Las mejores vistas, beer garden con ping pong. Milo puede correr.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Lennon+Wall+Prague" target="_blank" rel="noopener"><div class="hl-name">Muro de Lennon</div><div class="hl-desc">Muro de graffiti de la era comunista. Foto r&aacute;pida 5 min.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Vysehrad+Prague" target="_blank" rel="noopener"><div class="hl-name">Vy&scaron;ehrad</div><div class="hl-desc">Fortaleza al sur, mucho menos turismo. Cementerio de Dvo&#345;&aacute;k.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+
+<div class="eat-card">
+<div class="eat-label">&#127860; D&oacute;nde comer en Praga</div>
+<ul>
+<li>Goulash + knedl&iacute;ky en cualquier hospoda local (&euro;6-10)</li>
+<li>Trdeln&iacute;k (chimney cake) en la calle &mdash; Milo lo ama</li>
+<li>Evitar restaurantes sobre Old Town Square (tur&iacute;sticos)</li>
+<li>Calles secundarias en Vinohrady o &#381;i&#382;kov son mejores</li>
+</ul>
+</div>
+
+<div class="callout callout-warn">&#9889; <b>Ma&ntilde;ana tren 09:01.</b> RegioJet a Viena, 4h17. Irse del Airbnb ~08:00. Bolt a las 08:15 &mdash; reservar esta noche.</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 14 — Ma 26 mayo — Praga → Viena -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d14" data-city="vienna" data-flag="&#127462;&#127481;" data-cityname="Viena" data-ctxinfo="3 noches &middot; Airbnb Leopoldstadt" data-currency="&#128182; EUR" data-temp="14-22&deg;C">
+<div class="date-label"><span class="day-num">D&iacute;a 14</span> Martes 26 de mayo <span class="dbadge dbadge-train">&#128646; Traslado</span></div>
+
+<div class="city-depart">
+<div class="cd-title">&uarr; Salir de Praga</div>
+<p>Bolt a Praha hl.n. &middot; 10 min &middot; 4-7&euro; &middot; Irse ~08:00. RegioJet: trenes amarillos, Wi-Fi incluido.</p>
+</div>
+
+<div class="transfer-card">
+<div class="tc-title">&#128646; Praga &rarr; Viena</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">09:01</span> <b>Praha hl.n.</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">RegioJet RJ 1033 &middot; 4h 17m</div>
+<div class="tc-leg"><span class="tc-time">13:18</span> <b>Wien Hbf</b></div>
+</div>
+<div class="tc-detail">Vag&oacute;n 4 &middot; Asientos 61, 62, 63 &middot; Ticket #9453353824</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; &euro;61.80 <a href="https://drive.google.com/file/d/1P4Qx4GaeGnh__aiKHQJtiV4XyuNkHX-8/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<!-- ARRIVE VIENNA -->
+<div class="city-arrive" id="arrive-vienna" data-city="vienna" data-flag="&#127462;&#127481;" data-cityname="Viena" data-ctxinfo="3 noches &middot; Airbnb Leopoldstadt" data-currency="&#128182; EUR" data-temp="14-22&deg;C">
+<h3>&#127462;&#127481; Bienvenidos a Viena</h3>
+<div class="ca-sub">3 noches &middot; 26 &rarr; 29 mayo &middot; Lleg&aacute;s 13:18</div>
+<div class="ca-meta">
+<span>&#128182; Euro</span>
+<span>&#127777; 14&ndash;22&deg;C</span>
+<span>&#128483; Alem&aacute;n</span>
+<span>Capital de la m&uacute;sica</span>
+</div>
+</div>
+
+<div class="accom-card">
+<div class="ac-name">&#127968; Airbnb Leopoldstadt</div>
+<div class="ac-addr"><a href="https://www.google.com/maps/search/?api=1&query=Novaragasse+38+Vienna+1020" target="_blank" rel="noopener">Novaragasse 38, Vienna 1020</a></div>
+<div class="ac-times">Check-in: Mar 26, 15:00 &middot; Check-out: Vie 29, 11:00</div>
+<div class="ac-status ac-paid">&#10003; Pagado $488 &middot; Luisina &middot; 3 noches &middot; Host: Chaim</div>
+<a class="ac-link" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HM8A38FHP4" target="_blank" rel="noopener">Ver en Airbnb &rarr;</a>
+</div>
+
+<div class="callout callout-return">&darr; Metro U1 (Wien Hbf &rarr; Nestroyplatz, 5 estaciones) &middot; 15 min &middot; 3.20&euro;. Tip: ticket 7 d&iacute;as 28.90&euro;.</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Tarde &mdash; Centro <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Catedral San Esteban, Ringstrasse, Hofburg.</div>
+<div class="act-body"><div class="act-inner">
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=St+Stephens+Cathedral+Vienna" target="_blank" rel="noopener"><div class="hl-name">Catedral San Esteban</div><div class="hl-desc">El centro de Viena. Nave interior gratis. Torre 343 escalones (hay ascensor).</div><span class="hl-foot">Ver por fuera</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Ringstrasse+Vienna" target="_blank" rel="noopener"><div class="hl-name">Ringstrasse</div><div class="hl-desc">Bulevar imperial, 30 min desde la &Oacute;pera hasta Hofburg. Monumental.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Hofburg+Palace+Vienna" target="_blank" rel="noopener"><div class="hl-name">Hofburg</div><div class="hl-desc">Palacio imperial. Con Milo: elegir Sisi (interactivo) o Tesoro (r&aacute;pido, 45 min).</div><span class="hl-foot">Reservar</span></a>
+</div></div>
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 15 — Mi 27 mayo — Viena Palacios -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block city-start" id="d15" data-city="vienna">
+<div class="date-label"><span class="day-num">D&iacute;a 15</span> Mi&eacute;rcoles 27 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Viena &mdash; Palacios <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Imperdibles: Sch&ouml;nbrunn (jardines + palacio), Belvedere ("El Beso"). Caf&eacute; Central.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona Palacios</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Schonbrunn+Palace+Vienna" target="_blank" rel="noopener"><div class="hl-name">Sch&ouml;nbrunn &#11088;</div><div class="hl-desc">Jardines GRATIS &mdash; subir hasta la Glorieta. Milo puede correr libre. Palacio con reserva.</div><span class="hl-foot">Jardines gratis &middot; Reservar palacio</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Belvedere+Palace+Vienna" target="_blank" rel="noopener"><div class="hl-name">Belvedere &mdash; "El Beso" &#11088;</div><div class="hl-desc">"El Beso" de Klimt en tama&ntilde;o real. Jardines barrocos. Reservar online.</div><span class="hl-foot">Reservar &middot; &euro;16</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Cafe+Central+Vienna" target="_blank" rel="noopener"><div class="hl-name">Caf&eacute; Central</div><div class="hl-desc">El caf&eacute; vien&eacute;s por excelencia. Sachertorte excelente. Cola probable.</div><span class="hl-foot">Gratis entrada</span></a>
+</div></div>
+
+<div class="note note-info">Tambi&eacute;n: <a href="https://www.google.com/maps/search/?api=1&query=Austrian+National+Library+Vienna" target="_blank" rel="noopener">Biblioteca Nacional</a> (sala barroca, 30 min), <a href="https://www.google.com/maps/search/?api=1&query=Vienna+State+Opera" target="_blank" rel="noopener">&Oacute;pera</a> (standing room &euro;4, sin Milo), <a href="https://www.google.com/maps/search/?api=1&query=MuseumsQuartier+Vienna" target="_blank" rel="noopener">MuseumsQuartier</a> (patios gratis, Milo puede jugar).</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 16 — Ju 28 mayo — Viena Día libre -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d16" data-city="vienna">
+<div class="date-label"><span class="day-num">D&iacute;a 16</span> Jueves 28 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Viena &mdash; D&iacute;a libre <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Prater + Noria (barrio del Airbnb), Hundertwasser, Naschmarkt O day trip Bratislava.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="callout callout-warn">&#9889; <b>Decisi&oacute;n pendiente:</b> Day trip Bratislava (tren 1h, ~&euro;20 ida/vuelta) o d&iacute;a libre en Viena (Prater, Naschmarkt, termas). Con Milo, Viena es m&aacute;s c&oacute;modo.</div>
+
+<div class="slabel">Zona Libre &middot; Prater, Hundertwasser o Bratislava</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Prater+Vienna" target="_blank" rel="noopener"><div class="hl-name">Prater + Noria</div><div class="hl-desc">Noria hist&oacute;rica de 1897. Milo la va a recordar siempre. Parque enorme con juegos.</div><span class="hl-foot">Noria ~&euro;13 &middot; Parque gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Hundertwasserhaus+Vienna" target="_blank" rel="noopener"><div class="hl-name">Hundertwasser</div><div class="hl-desc">Edificio colorido sin &aacute;ngulos rectos. Ver desde fuera, 10 min.</div><span class="hl-foot">Ver por fuera</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Naschmarkt+Vienna" target="_blank" rel="noopener"><div class="hl-name">Naschmarkt</div><div class="hl-desc">Mercado m&aacute;s grande de Viena, al aire libre. Milo puede snackear.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+
+<div class="eat-card">
+<div class="eat-label">&#127860; D&oacute;nde comer en Viena</div>
+<ul>
+<li>Schnitzel: <b>Figlm&uuml;ller</b> (famoso, cola) o cualquier Gasthaus (&euro;12-16)</li>
+<li>W&uuml;rstelstand (salchichas en la calle) &mdash; r&aacute;pido y barato</li>
+<li><b>Naschmarkt</b> para almuerzo variado</li>
+<li>Sachertorte: Caf&eacute; Central o Hotel Sacher (&euro;7-8)</li>
+</ul>
+</div>
+
+<div class="callout callout-warn">&#9889; <b>Ma&ntilde;ana tren 10:42.</b> &Ouml;BB a Budapest, 2h37. Checkout 11:00 pero irse ~10:00. Metro U1 directo. Tener pasaportes &mdash; posible control frontera h&uacute;ngara.</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 17 — Vi 29 mayo — Viena → Budapest -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d17" data-city="budapest" data-flag="&#127469;&#127482;" data-cityname="Budapest" data-ctxinfo="4 noches &middot; Airbnb Belv&aacute;ros" data-currency="HUF" data-temp="16-23&deg;C">
+<div class="date-label"><span class="day-num">D&iacute;a 17</span> Viernes 29 de mayo <span class="dbadge dbadge-train">&#128646; Traslado</span></div>
+
+<div class="city-depart">
+<div class="cd-title">&uarr; Salir de Viena</div>
+<p>Metro U1 (Nestroyplatz &rarr; Wien Hbf) &middot; 15 min &middot; 3.20&euro;. Irse ~10:00. Pasaportes accesibles.</p>
+</div>
+
+<div class="transfer-card">
+<div class="tc-title">&#128646; Viena &rarr; Budapest</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">10:42</span> <b>Wien Hbf (And. 3-12)</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">&Ouml;BB EC 143 &middot; 2h 37m</div>
+<div class="tc-leg"><span class="tc-time">13:19</span> <b>Budapest-Keleti</b></div>
+</div>
+<div class="tc-detail">Clase 2 &middot; Sparschiene &middot; Buchung 0316 0335 1806 4455</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; &euro;86.40 <a href="https://drive.google.com/file/d/1zIw4TekGicgtW3t1TwBH5SpLhxcaxRqV/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<!-- ARRIVE BUDAPEST -->
+<div class="city-arrive" id="arrive-budapest" data-city="budapest" data-flag="&#127469;&#127482;" data-cityname="Budapest" data-ctxinfo="4 noches &middot; Airbnb Belv&aacute;ros" data-currency="HUF" data-temp="16-23&deg;C">
+<h3>&#127469;&#127482; Bienvenidos a Budapest</h3>
+<div class="ca-sub">4 noches &middot; 29 mayo &rarr; 2 junio &middot; Lleg&aacute;s 13:19</div>
+<div class="ca-meta">
+<span>&#128176; Forinto (HUF)</span>
+<span>&#127777; 16&ndash;23&deg;C</span>
+<span>&#128483; H&uacute;ngaro</span>
+<span>Ciudad de termas</span>
+</div>
+</div>
+
+<div class="accom-card">
+<div class="ac-name">&#127968; Airbnb Distrito V &mdash; Belv&aacute;ros</div>
+<div class="ac-addr"><a href="https://www.google.com/maps/search/?api=1&query=S%C3%B6rh%C3%A1z+utca+3+Budapest+1056" target="_blank" rel="noopener">S&ouml;rh&aacute;z utca 3, Budapest 1056</a></div>
+<div class="ac-times">Check-in: Vie 29, 15:00 &middot; Check-out: Mar 2 jun, 10:00</div>
+<div class="ac-status ac-paid">&#10003; Pagado $590 &middot; Luisina &middot; 4 noches &middot; Host: Charbel</div>
+<a class="ac-link" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HM3MWYA93W" target="_blank" rel="noopener">Ver en Airbnb &rarr;</a>
+</div>
+
+<div class="callout callout-return">&darr; Bolt desde Keleti &middot; 10-15 min &middot; 4-8&euro;. NO cambiar dinero en Keleti. Cajero OTP Bank afuera.</div>
+<div class="note note-info">&#128161; Forinto: 1&euro; &#8776; 400 HUF. Budapest es la ciudad m&aacute;s barata del viaje. Almuerzo para 3: ~&euro;15-20.</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 18 — Sa 30 mayo — Budapest Parlamento -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block city-start" id="d18" data-city="budapest">
+<div class="date-label"><span class="day-num">D&iacute;a 18</span> S&aacute;bado 30 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Budapest &mdash; Parlamento <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Parlamento 11:00 (confirmado), Basti&oacute;n Pescadores, Puente de las Cadenas. Elegir 3-4 cosas, no m&aacute;s.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Visita al Parlamento</div>
+<div class="transfer-card" style="border-left-color:var(--ok)">
+<div class="tc-title" style="color:var(--ok)">&#127963; Parlamento &mdash; Tour con audiogu&iacute;a</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">11:00</span> <b>Parlament &mdash; L&aacute;togat&oacute;k&ouml;zpont, Kossuth t&eacute;r 1-3</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">Tour con audiogu&iacute;a &middot; ~45 min &middot; 2 entradas (Milo gratis)</div>
+<div class="tc-leg"><span class="tc-time">~11:45</span> <b>Fin del tour</b></div>
+</div>
+<div class="tc-detail">Compra: EPQSLNGAX8XM &middot; Paulo 14.000 Ft + Luisina 7.000 Ft (EEA) &middot; Llevar jegyek</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; 21.000 Ft (~&euro;52) <a href="https://drive.google.com/file/d/1TS6hFStBZrmLDU9cqEDZD8fxcL688rSH/view" target="_blank" rel="noopener">Ver PDF &rarr;</a> <a href="https://wallet.google.com/wallet/u/1/passes/CiBmZmQyZGJhYmI2N2M0MTY1OWFiODgzNmNmNTQzZDNjNw?utm_source=wallet&utm_medium=website&utm_campaign=legacy-web-flow" target="_blank" rel="noopener">Google Wallet &rarr;</a></div>
+</div>
+
+<div class="slabel">Zona Buda + Pest Centro</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Hungarian+Parliament+Building+Budapest" target="_blank" rel="noopener"><div class="hl-name">Parlamento &#11088;</div><div class="hl-desc">Neo-g&oacute;tico frente al Danubio. Llevar entradas impresas o en celular.</div><span class="hl-foot">&#10003; Confirmado &middot; 11:00</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Shoes+on+the+Danube+Bank+Budapest" target="_blank" rel="noopener"><div class="hl-name">Zapatos en el Danubio</div><div class="hl-desc">60 pares de zapatos de hierro, memorial de jud&iacute;os. Explicar a Milo con calma.</div><span class="hl-foot">Gratis &middot; 5 min</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Fishermans+Bastion+Budapest" target="_blank" rel="noopener"><div class="hl-name">Basti&oacute;n Pescadores &#11088;</div><div class="hl-desc">La mejor vista del Parlamento desde Buda. Escaleras o ascensor.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Szechenyi+Chain+Bridge+Budapest" target="_blank" rel="noopener"><div class="hl-name">Puente de las Cadenas &#11088;</div><div class="hl-desc">Leones en los pilares, se ilumina en dorado de noche. Cruzarlo a pie: 20 min.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+
+<div class="note note-info">Tambi&eacute;n: <a href="https://www.google.com/maps/search/?api=1&query=Matthias+Church+Budapest" target="_blank" rel="noopener">Iglesia Mat&iacute;as</a>, <a href="https://www.google.com/maps/search/?api=1&query=Buda+Castle+Budapest" target="_blank" rel="noopener">Castillo Buda</a> (funicular), <a href="https://www.google.com/maps/search/?api=1&query=St+Stephens+Basilica+Budapest" target="_blank" rel="noopener">Bas&iacute;lica San Esteban</a> (c&uacute;pula 360&deg;), <a href="https://www.google.com/maps/search/?api=1&query=Dohany+Street+Synagogue+Budapest" target="_blank" rel="noopener">Gran Sinagoga</a>.</div>
+
+<div class="eat-card">
+<div class="eat-label">&#127860; D&oacute;nde comer en Budapest</div>
+<ul>
+<li>Goulash en cualquier &eacute;tterem local (&euro;15-20 para 3)</li>
+<li><b>Central Market Hall</b> para l&aacute;ngos y paprika</li>
+<li>Ruin bars (<b>Szimpla Kert</b>) para cena informal</li>
+<li>Helado: <b>Gelarto Rosa</b> (junto a la Bas&iacute;lica) &mdash; Milo va a repetir</li>
+</ul>
+</div>
+
+<div class="note note-info">&#128161; Pausa sugerida: Despu&eacute;s del Basti&oacute;n, parar en un caf&eacute; con terraza en Buda antes de cruzar el Puente.</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 19 — Do 31 mayo — Budapest Termas -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d19" data-city="budapest">
+<div class="date-label"><span class="day-num">D&iacute;a 19</span> Domingo 31 de mayo</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Budapest &mdash; Termas <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Ba&ntilde;os Sz&eacute;chenyi (Milo puede meterse), Central Market Hall, Isla Margarita al atardecer.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona V&aacute;rosliget + Sur</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Szechenyi+Thermal+Bath+Budapest" target="_blank" rel="noopener"><div class="hl-name">Ba&ntilde;os Sz&eacute;chenyi &#11088;</div><div class="hl-desc">Piscinas al aire libre + interiores. Milo puede meterse. Online 15-20% m&aacute;s barato.</div><span class="hl-foot">Reservar &middot; Online m&aacute;s barato</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Central+Market+Hall+Budapest" target="_blank" rel="noopener"><div class="hl-name">Central Market Hall &#11088;</div><div class="hl-desc">Probar los l&aacute;ngos (masa frita). Paprika y foie gras baratos para llevar.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Margaret+Island+Budapest" target="_blank" rel="noopener"><div class="hl-name">Isla Margarita</div><div class="hl-desc">Isla peatonal. Fuentes danzantes al anochecer con m&uacute;sica. Milo va a flipar.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+
+<div class="note note-info">En V&aacute;rosliget: <a href="https://www.google.com/maps/search/?api=1&query=Vajdahunyad+Castle+Budapest" target="_blank" rel="noopener">Castillo Vajdahunyad</a> (foto, gratis) y <a href="https://www.google.com/maps/search/?api=1&query=Museum+of+Fine+Arts+Budapest" target="_blank" rel="noopener">Museo Bellas Artes</a>. Alternativa: <a href="https://www.google.com/maps/search/?api=1&query=Gellert+Thermal+Bath+Budapest" target="_blank" rel="noopener">Ba&ntilde;os Gell&eacute;rt</a> (Art Nouveau).</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 20 — Lu 1 junio — Budapest Crucero -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block" id="d20" data-city="budapest">
+<div class="date-label"><span class="day-num">D&iacute;a 20</span> Lunes 1 de junio</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Budapest &mdash; Crucero <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">Colina Gell&eacute;rt al atardecer, Crucero Danubio de noche. &Uacute;ltima noche &mdash; preparar maletas.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="callout callout-crit">&#9888;&#65039; <b>&Uacute;ltima noche.</b> Vuelo 09:50 ma&ntilde;ana &mdash; salir del Airbnb a las 05:30. Preparar maletas hoy antes de cenar. Reservar Bolt esta noche.</div>
+
+<div class="slabel">Zona Andr&aacute;ssy + Gell&eacute;rt</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Gellert+Hill+Budapest" target="_blank" rel="noopener"><div class="hl-name">Colina Gell&eacute;rt &#11088;</div><div class="hl-desc">Vista panor&aacute;mica 360&deg;. Con Milo, taxi arriba y bajar caminando. Ideal al atardecer.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Danube+River+Cruise+Budapest" target="_blank" rel="noopener"><div class="hl-name">Crucero Danubio &#11088;</div><div class="hl-desc">Tour en barco de noche: Parlamento iluminado, Castillo, puentes dorados. La despedida perfecta.</div><span class="hl-foot">Reservar &middot; De noche</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Andrassy+Avenue+Budapest" target="_blank" rel="noopener"><div class="hl-name">Andr&aacute;ssy Avenue</div><div class="hl-desc">Bulevar UNESCO, mansiones. Caminar desde la &Oacute;pera hasta el Parque: 15 min.</div><span class="hl-foot">Gratis</span></a>
+</div></div>
+
+<div class="note note-info">Si hay energ&iacute;a: <a href="https://www.google.com/maps/search/?api=1&query=Hungarian+State+Opera+House+Budapest" target="_blank" rel="noopener">&Oacute;pera</a> (fachada imperdible), <a href="https://www.google.com/maps/search/?api=1&query=House+of+Terror+Budapest" target="_blank" rel="noopener">House of Terror</a> (sin Milo), <a href="https://www.google.com/maps/search/?api=1&query=Liberty+Bridge+Budapest" target="_blank" rel="noopener">Liberty Bridge</a>, <a href="https://www.google.com/maps/search/?api=1&query=Citadella+Budapest" target="_blank" rel="noopener">Ciudadela</a>.</div>
+
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 21 — Ma 2 junio — Budapest → Madrid -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d21" data-city="madrid" data-flag="&#127466;&#127480;" data-cityname="Madrid" data-ctxinfo="1 noche &middot; Alojamiento pendiente" data-currency="&#128182; EUR" data-temp="18-28&deg;C">
+<div class="date-label"><span class="day-num">D&iacute;a 21</span> Martes 2 de junio <span class="dbadge dbadge-flight">&#9992; Vuelo</span></div>
+
+<div class="city-depart">
+<div class="cd-title">&uarr; Salir de Budapest</div>
+<p>Bolt/taxi pre-reservado &middot; 30-40 min &middot; 20-30&euro;. Salir 05:30. Estar 07:00 en BUD. Check-in online Ryanair 48h antes.</p>
+</div>
+
+<div class="transfer-card">
+<div class="tc-title">&#9992;&#65039; Budapest &rarr; Madrid</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">09:50</span> <b>Budapest (BUD) &mdash; T2B</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">Ryanair FR5712 &middot; HTKB9M &middot; 3h 20m</div>
+<div class="tc-leg"><span class="tc-time">13:10</span> <b>Madrid (MAD) &mdash; T1</b></div>
+</div>
+<div class="tc-detail">Ryanair: equipaje de mano estricto</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; $480 <a href="https://drive.google.com/file/d/1euZ_Aw8EScFuLmvW-tPDJMAFv0go87Ba/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<!-- ARRIVE MADRID -->
+<div class="city-arrive" id="arrive-madrid" data-city="madrid" data-flag="&#127466;&#127480;" data-cityname="Madrid" data-ctxinfo="1 noche &middot; Alojamiento pendiente" data-currency="&#128182; EUR" data-temp="18-28&deg;C">
+<h3>&#127466;&#127480; Madrid &mdash; &Uacute;ltima parada</h3>
+<div class="ca-sub">Medio d&iacute;a + 1 noche &middot; 2 junio &middot; Lleg&aacute;s 13:10</div>
+<div class="ca-meta">
+<span>&#128182; Euro</span>
+<span>&#127777; 18&ndash;28&deg;C</span>
+<span>&#128483; Espa&ntilde;ol</span>
+</div>
+</div>
+
+<div class="accom-card">
+<div class="ac-name">&#127968; Alojamiento Madrid</div>
+<div class="ac-times">1 noche &middot; 2 &rarr; 3 junio &middot; Zona Gran V&iacute;a, Malasa&ntilde;a o Chueca</div>
+<div class="ac-status ac-pending">&#9888; Sin reserva &mdash; PENDIENTE</div>
+</div>
+
+<div class="callout callout-return">&darr; Taxi tarifa fija 33&euro; &middot; 25-35 min &middot; Oficial, incluye maletas. Parada planta 0.</div>
+
+<div class="act-card" onclick="togAct(this)">
+<div class="act-title">Tarde &mdash; &Uacute;ltima del viaje <span class="act-chev">&#9660;</span></div>
+<div class="act-summary">D&iacute;a 21 &mdash; solo lo que salga, no forzar nada. Retiro, San Miguel, ca&ntilde;as en Malasa&ntilde;a.</div>
+<div class="act-body"><div class="act-inner">
+
+<div class="slabel">Zona Centro</div>
+<div class="hl-scroll"><div class="hl-row">
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Museo+del+Prado+Madrid" target="_blank" rel="noopener"><div class="hl-name">Museo del Prado</div><div class="hl-desc">Vel&aacute;zquez, Goya, El Bosco. Evaluar energ&iacute;a despu&eacute;s de 3 semanas.</div><span class="hl-foot">Reservar</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Retiro+Park+Madrid" target="_blank" rel="noopener"><div class="hl-name">Retiro + San Miguel</div><div class="hl-desc">Milo puede correr libre. San Miguel a 10 min: tapas, vino, jam&oacute;n.</div><span class="hl-foot">Parque gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Malasana+Madrid" target="_blank" rel="noopener"><div class="hl-name">Ca&ntilde;as en Malasa&ntilde;a</div><div class="hl-desc">La noche final. El barrio m&aacute;s de bares. Ca&ntilde;as y pintxos bien merecidos.</div><span class="hl-foot">Gratis &middot; &Uacute;ltima noche</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Puerta+del+Sol+Madrid" target="_blank" rel="noopener"><div class="hl-name">Puerta del Sol</div><div class="hl-desc">Kil&oacute;metro 0. Foto con el Oso y el Madro&ntilde;o &mdash; el cierre perfecto.</div><span class="hl-foot">Gratis</span></a>
+<a class="hl-card" href="https://www.google.com/maps/search/?api=1&query=Royal+Palace+of+Madrid" target="_blank" rel="noopener"><div class="hl-name">Palacio Real</div><div class="hl-desc">Solo si la energ&iacute;a da despu&eacute;s de 22 d&iacute;as.</div><span class="hl-foot">Reservar &middot; ~&euro;16</span></a>
+</div></div>
+
+<div class="eat-card">
+<div class="eat-label">&#127860; D&oacute;nde comer en Madrid</div>
+<ul>
+<li><b>Mercado San Miguel</b> &mdash; tapas variadas, &euro;3-5 cada una</li>
+<li>Ca&ntilde;as + pintxos en <b>Malasa&ntilde;a</b> o <b>La Latina</b></li>
+<li>Jam&oacute;n ib&eacute;rico: cualquier bar de barrio</li>
+<li>Cena final: reservar algo lindo para celebrar</li>
+</ul>
+</div>
+</div></div>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DAY 22 — Mi 3 junio — Madrid → Buenos Aires -->
+<!-- ══════════════════════════════════════════ -->
+<div class="date-block transfer-day" id="d22" data-city="flight" data-flag="&#9992;" data-cityname="Regreso" data-ctxinfo="Madrid &rarr; Buenos Aires" data-currency="&#128182; EUR" data-temp="--">
+<div class="date-label"><span class="day-num">D&iacute;a 22</span> Mi&eacute;rcoles 3 de junio <span class="dbadge dbadge-flight">&#9992; Regreso</span></div>
+
+<div class="city-depart">
+<div class="cd-title">&uarr; Salir de Madrid</div>
+<p>Taxi tarifa fija 33&euro; a T4S. Salir ~08:30. Vuelo intercontinental: estar 09:30.</p>
+</div>
+
+<div class="transfer-card">
+<div class="tc-title">&#9992;&#65039; Madrid &rarr; Buenos Aires</div>
+<div class="tc-legs">
+<div class="tc-leg"><span class="tc-time">12:15</span> <b>Barajas (MAD) &mdash; T4S</b></div>
+<div class="tc-leg" style="font-size:10px;padding-left:44px;color:var(--tx3)">Iberia IB0107 &middot; L6NG6 &middot; 12h 40m</div>
+<div class="tc-leg"><span class="tc-time">19:55</span> <b>Ezeiza (EZE) &mdash; Terminal IA</b></div>
+</div>
+<div class="tc-detail">Reserv&oacute;: Luisina</div>
+<div class="tc-booking confirmed">&#10003; Confirmado &middot; $1.800 <a href="https://drive.google.com/file/d/1c-4HnMuoEMd_pPgs410Cc1ihrkfM-X8O/view" target="_blank" rel="noopener">Ver reserva &rarr;</a></div>
+</div>
+
+<div class="callout callout-crit">&#9888;&#65039; Vuelo sale de T4S (SAT&Eacute;LITE de T4). Pedir taxi directo a T4S.</div>
+<div class="note note-info">&#128161; Llegada Ezeiza 19:55. Tener declaraci&oacute;n de aduana si compraron m&aacute;s de la franquicia. <b>Fin del viaje. Bienvenidos a casa.</b></div>
+</div>
+
+</div><!-- end spine -->
+
+<!-- ══════════════════════════════════════════ -->
+<!-- DOCUMENTS SECTION -->
+<!-- ══════════════════════════════════════════ -->
+<section class="docs-section" id="docs">
+<h3>Documentos y Reservas</h3>
+<p>Acceso r&aacute;pido a reservas, tickets y documentaci&oacute;n</p>
+
+<div class="docs-cat">
+<div class="docs-cat-title">Vuelos</div>
+<a class="doc-item" href="https://drive.google.com/file/d/1c-4HnMuoEMd_pPgs410Cc1ihrkfM-X8O/view" target="_blank" rel="noopener"><b>IB0108</b> BsAs &rarr; Madrid &middot; 13 may <span>Iberia &middot; $1.800</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/11zdCQWNnggCC1WYjpPh1T46XwKoGrTtq/view" target="_blank" rel="noopener"><b>IB0603</b> Madrid &rarr; Bruselas &middot; 14 may <span>Iberia &middot; $513</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/1euZ_Aw8EScFuLmvW-tPDJMAFv0go87Ba/view" target="_blank" rel="noopener"><b>FR5712</b> Budapest &rarr; Madrid &middot; 2 jun <span>Ryanair &middot; $480</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/1c-4HnMuoEMd_pPgs410Cc1ihrkfM-X8O/view" target="_blank" rel="noopener"><b>IB0107</b> Madrid &rarr; BsAs &middot; 3 jun &middot; 12:15 <span>Iberia &middot; $1.800</span></a>
+</div>
+
+<div class="docs-cat">
+<div class="docs-cat-title">Trenes</div>
+<a class="doc-item" href="https://drive.google.com/file/d/1ZwQ2ljEHoNorrjEpBGi5rh0SGbfOXb5c/view" target="_blank" rel="noopener"><b>Bruselas &rarr; &Aacute;msterdam</b> 17 may &middot; Eurostar 9305 &middot; 08:22&rarr;10:20 <span>$113 &middot; K4YNTJ</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/12hSBADAZDV8BTakYmk5yJDR3Nf2w8Y5d/view" target="_blank" rel="noopener"><b>&Aacute;msterdam &rarr; Berl&iacute;n</b> 19 may &middot; DB ICE 143 &middot; 1ra Clase &middot; 08:00&rarr;13:42 <span>$182 &middot; 3JW7983P</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/1_yj-Rc4GA18dZDjg1Avy5iS_-jugO_YC/view" target="_blank" rel="noopener"><b>Berl&iacute;n &rarr; Praga</b> 23 may &middot; &#268;D rj 173 &middot; 09:28&rarr;13:25 <span>$137 &middot; Ref WKF81M</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/1P4Qx4GaeGnh__aiKHQJtiV4XyuNkHX-8/view" target="_blank" rel="noopener"><b>Praga &rarr; Viena</b> 26 may &middot; RegioJet RJ 1033 &middot; 09:01&rarr;13:18 <span>&euro;61.80 &middot; #9453353824</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/1zIw4TekGicgtW3t1TwBH5SpLhxcaxRqV/view" target="_blank" rel="noopener"><b>Viena &rarr; Budapest</b> 29 may &middot; &Ouml;BB EC 143 &middot; 10:42&rarr;13:19 <span>&euro;86.40 &middot; Buchung 0316 0335 1806 4455</span></a>
+</div>
+
+<div class="docs-cat">
+<div class="docs-cat-title">Alojamiento</div>
+<a class="doc-item" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HMN49ZXM4W" target="_blank" rel="noopener"><b>Bruselas</b> Airbnb Saint-Gilles &middot; 3 noches <span>$541</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/1p7NaROdeH2cD8gbIUGfMQ08Fdtsj_WNZ/view" target="_blank" rel="noopener"><b>&Aacute;msterdam</b> Hotel Euphemia &middot; 2 noches <span>$388</span></a>
+<a class="doc-item" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HMJPASYEFD" target="_blank" rel="noopener"><b>Berl&iacute;n</b> Airbnb Moabit &middot; 4 noches <span>$603</span></a>
+<a class="doc-item" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HMYMZ4CTH2" target="_blank" rel="noopener"><b>Praga</b> Airbnb Vinohrady &middot; 3 noches <span>$498</span></a>
+<a class="doc-item" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HM8A38FHP4" target="_blank" rel="noopener"><b>Viena</b> Airbnb Leopoldstadt &middot; 3 noches <span>$488</span></a>
+<a class="doc-item" href="https://www.airbnb.com.ar/trips/v1/reservation-details/ro/RESERVATION2_CHECKIN/HM3MWYA93W" target="_blank" rel="noopener"><b>Budapest</b> Airbnb Belv&aacute;ros &middot; 4 noches <span>$590</span></a>
+<div class="doc-item doc-pending"><b>Madrid</b> Alojamiento por confirmar &middot; 1 noche &middot; 2&rarr;3 jun</div>
+</div>
+
+<div class="docs-cat">
+<div class="docs-cat-title">Entradas y tours</div>
+<a class="doc-item" href="https://drive.google.com/file/d/19AsI4nxmWwB47QRnQHylEYv528xLs156/view" target="_blank" rel="noopener"><b>Reichstag Berl&iacute;n</b> 19 may &middot; 18:30 &middot; Tour espa&ntilde;ol &middot; 3 pax <span>Gratis &middot; Confirmado &#10003;</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/1I4SPliri0p_vUnTzNYWOrCeGYxdimxRQ/view" target="_blank" rel="noopener"><b>Reichstag &mdash; Info visitantes</b> Reglamento, horarios <span>Leer antes</span></a>
+<a class="doc-item" href="https://drive.google.com/file/d/1kA_COa9cfbLkzyJhaRKrXL4_MxOebj6t/view" target="_blank" rel="noopener"><b>Reichstag &mdash; Lista participantes</b> Paulo, Luisina, Milo <span>Llevar pasaporte</span></a>
+<div class="doc-item doc-pending"><b>Rijksmuseum o Van Gogh</b> &Aacute;msterdam &middot; Sin reservar <span>Elegir uno</span></div>
+<div class="doc-item doc-pending"><b>Castillo de Praga</b> Sin reservar <span>hrad.cz</span></div>
+<div class="doc-item doc-pending"><b>Sch&ouml;nbrunn</b> Viena &middot; Sin reservar <span>schoenbrunn.at</span></div>
+<div class="doc-item doc-pending"><b>Belvedere</b> Viena &middot; El Beso de Klimt <span>belvedere.at</span></div>
+<a class="doc-item" href="https://drive.google.com/file/d/1TS6hFStBZrmLDU9cqEDZD8fxcL688rSH/view" target="_blank" rel="noopener"><b>Parlamento Budapest</b> 30 may &middot; 11:00 &middot; 2 pax <span>21.000 Ft &middot; Confirmado &#10003;</span></a>
+<a class="doc-item" href="https://wallet.google.com/wallet/u/1/passes/CiBmZmQyZGJhYmI2N2M0MTY1OWFiODgzNmNmNTQzZDNjNw?utm_source=wallet&utm_medium=website&utm_campaign=legacy-web-flow" target="_blank" rel="noopener"><b>Parlamento &mdash; Google Wallet</b> Entradas digitales <span>Abrir en Wallet</span></a>
+<div class="doc-item doc-pending"><b>Ba&ntilde;os Sz&eacute;chenyi</b> Budapest &middot; Sin reservar <span>szechenyibath.hu</span></div>
+</div>
+
+<div class="docs-cat">
+<div class="docs-cat-title">Documentaci&oacute;n de viaje</div>
+<a class="doc-item" href="https://drive.google.com/drive/u/1/folders/13G-stCtqVOEf_i4hVDBn15fUmDOfVRNy" target="_blank" rel="noopener"><b>Carpeta Drive</b> PDFs, comprobantes y documentos <span>Todos los archivos</span></a>
+<a class="doc-item" href="https://docs.google.com/spreadsheets/d/1zMsgzVNF3QJkw_cVROickTUYvvPm12eEEl-W6peCWuA/edit" target="_blank" rel="noopener"><b>Spreadsheet</b> Itinerario completo, traslados, hospedajes <span>Fuente de verdad</span></a>
+<div class="doc-item doc-pending"><b>Pasaportes</b> Escanear pasaportes &middot; Subir a Drive</div>
+<div class="doc-item doc-pending"><b>Seguro de viaje</b> Cobertura m&eacute;dica &ge;&euro;30.000 <span>Assist Card o similar</span></div>
+<div class="doc-item doc-pending"><b>Contactos embajadas ARG</b> B&eacute;lgica, Holanda, Alemania, Rep. Checa, Austria, Hungr&iacute;a, Espa&ntilde;a</div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- PENDING CHECKLIST -->
+<!-- ══════════════════════════════════════════ -->
+<section class="pending-section" id="pendientes">
+<div class="pending-hdr">
+<h3>Pendientes</h3>
+<p>Acciones antes del viaje</p>
+<div class="pend-counter" id="pendCounter">0 de 11 completadas</div>
+<div class="pend-progress"><div class="pend-progress-fill" id="pendFill" style="width:0%"></div></div>
+</div>
+
+<div class="pend-item" data-pend="1" onclick="togglePend(1)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">&Aacute;msterdam &mdash; Rijksmuseum o Van Gogh</div><div class="pend-desc">Solo hay tiempo para uno. Van Gogh m&aacute;s compacto (1.5h), mejor con Milo. Ambos se agotan semanas antes.</div><div class="pend-tag pend-urgent">Reservar YA</div></div>
+</div>
+<div class="pend-item done" data-pend="2" onclick="togglePend(2)">
+<div class="pend-check checked"></div>
+<div class="pend-content"><div class="pend-title">Reichstag Berl&iacute;n &mdash; Reserva confirmada</div><div class="pend-desc">BA-20260324-003113-490 &middot; 19 may &middot; 18:30 &middot; Tour espa&ntilde;ol &middot; 3 pax &middot; Gratis.</div><div class="pend-tag" style="color:var(--ok)">Confirmado &#10003;</div></div>
+</div>
+<div class="pend-item" data-pend="3" onclick="togglePend(3)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">Praga &mdash; Castillo y Clementinum</div><div class="pend-desc">Castillo: tickets online para evitar filas. Clementinum: 10-12 personas por turno, reservar ya.</div><div class="pend-tag pend-todo">Reservar</div></div>
+</div>
+<div class="pend-item" data-pend="4" onclick="togglePend(4)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">Viena &mdash; Sch&ouml;nbrunn y Belvedere</div><div class="pend-desc">Sch&ouml;nbrunn jardines gratis, palacio necesita reserva. Belvedere entradas online evitan filas.</div><div class="pend-tag pend-todo">Reservar</div></div>
+</div>
+<div class="pend-item done" data-pend="5" onclick="togglePend(5)">
+<div class="pend-check checked"></div>
+<div class="pend-content"><div class="pend-title">Budapest &mdash; Parlamento</div><div class="pend-desc">Confirmado 30 may 11:00 &middot; Paulo 14.000 Ft + Luisina 7.000 Ft &middot; Milo gratis</div><div class="pend-tag" style="color:var(--ok)">Confirmado &#10003;</div></div>
+</div>
+<div class="pend-item" data-pend="6" onclick="togglePend(6)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">Budapest &mdash; Ba&ntilde;os Sz&eacute;chenyi</div><div class="pend-desc">Entrada online 15-20% m&aacute;s barata. Milo puede entrar en piscinas exteriores.</div><div class="pend-tag pend-todo">Reservar</div></div>
+</div>
+<div class="pend-item" data-pend="7" onclick="togglePend(7)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">Seguro de viaje</div><div class="pend-desc">Obligatorio recomendado para Europa con Milo (4 a&ntilde;os). Cobertura m&iacute;nima &euro;30.000.</div><div class="pend-tag pend-urgent">Urgente</div></div>
+</div>
+<div class="pend-item" data-pend="8" onclick="togglePend(8)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">Alojamiento Madrid &mdash; Reservar</div><div class="pend-desc">1 noche, 2&rarr;3 junio. Zona Gran V&iacute;a, Malasa&ntilde;a o Chueca.</div><div class="pend-tag pend-urgent">Urgente</div><a class="pend-link" href="https://www.booking.com/searchresults.es.html?city=-390625&checkin=2026-06-02&checkout=2026-06-03&group_adults=2&group_children=1&age=4&no_rooms=1" target="_blank" rel="noopener" onclick="event.stopPropagation()">Buscar en Booking &rarr;</a></div>
+</div>
+<div class="pend-item" data-pend="9" onclick="togglePend(9)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">Descargar PDFs de Airbnb</div><div class="pend-desc">Guardar PDF de confirmaci&oacute;n en carpeta Drive. Faltan: Bruselas, Praga, Viena, Budapest.</div><div class="pend-tag pend-todo">Documentaci&oacute;n</div></div>
+</div>
+<div class="pend-item" data-pend="10" onclick="togglePend(10)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">Copias de pasaportes en Drive</div><div class="pend-desc">Escanear pasaportes de Paulo, Luisina y Milo. Subir como backup digital.</div><div class="pend-tag pend-todo">Documentaci&oacute;n</div></div>
+</div>
+<div class="pend-item" data-pend="11" onclick="togglePend(11)">
+<div class="pend-check"></div>
+<div class="pend-content"><div class="pend-title">Contactos de emergencia</div><div class="pend-desc">N&uacute;meros de embajadas argentinas en los 7 pa&iacute;ses. Guardar offline.</div><div class="pend-tag pend-todo">Documentaci&oacute;n</div></div>
+</div>
+</section>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- BUDGET BAR -->
+<!-- ══════════════════════════════════════════ -->
+<section class="budget-bar">
+<div class="budget-items">
+<span class="budget-cat">&#9992;&#65039; Vuelos $4.593</span>
+<span class="budget-cat">&#128646; Trenes $593</span>
+<span class="budget-cat">&#127968; Hospedaje ~$3.258</span>
+<span class="budget-cat">&#128661; Traslados ~&euro;221</span>
+</div>
+<div class="budget-track">
+<div class="budget-seg" style="width:54%;background:#FF385C" title="Vuelos $4.593"></div>
+<div class="budget-seg" style="width:7%;background:#3b82f6" title="Trenes $593"></div>
+<div class="budget-seg" style="width:38%;background:#059669" title="Hospedaje ~$3.258"></div>
+<div class="budget-seg" style="width:3%;background:#d97706" title="Traslados ~&euro;221"></div>
+</div>
+<div class="budget-footer"><span>Pagado: ~$7.750</span><span>Pendiente: ~$750</span></div>
+</section>
+
+</main>
+
+<a class="to-top" href="#" id="toTop" aria-label="Volver arriba">&uarr;</a>
+
+<script>
+// ── THEME ──
+function toggleTheme(){document.body.classList.toggle('dark');const d=document.body.classList.contains('dark');document.getElementById('themeIcon').textContent=d?'\u2600\uFE0F':'\uD83C\uDF19';localStorage.setItem('pb_theme',d?'dark':'light')}
+(function(){const s=localStorage.getItem('pb_theme');if(s==='dark'||(!s&&matchMedia('(prefers-color-scheme:dark)').matches)){document.body.classList.add('dark');document.getElementById('themeIcon').textContent='\u2600\uFE0F'}})();
+
+// ── TOGGLE ACTIVITY CARDS ──
+function togAct(el){const b=el.querySelector('.act-body'),i=el.querySelector('.act-inner');if(!b)return;if(el.classList.contains('open')){b.style.height='0';el.classList.remove('open')}else{b.style.height=i.offsetHeight+'px';el.classList.add('open');setTimeout(()=>b.style.height='auto',360)}}
+
+// ── PROGRESS BAR ──
+const pb=document.getElementById('progressBar');
+window.addEventListener('scroll',()=>{pb.style.width=Math.min(scrollY/(document.documentElement.scrollHeight-innerHeight)*100,100)+'%'},{passive:true});
+
+// ── BACK TO TOP ──
+const tt=document.getElementById('toTop');
+window.addEventListener('scroll',()=>{tt.classList.toggle('show',scrollY>600)},{passive:true});
+
+// ── COUNTDOWN ──
+(function(){
+const dep=new Date('2026-05-13T21:40:00-03:00');
+function upd(){const el=document.getElementById('hdrCountdown');if(!el)return;const diff=dep-new Date();if(diff<=0){el.textContent='En viaje';return}const d=Math.floor(diff/864e5),h=Math.floor(diff%864e5/36e5);el.textContent='Faltan '+d+' d\u00edas, '+h+'h'}
+upd();setInterval(upd,60000)})();
+
+// ── CONTEXT BAR via IntersectionObserver ──
+(function(){
+const ctxBar=document.getElementById('ctxBar');
+const ctxFlag=document.getElementById('ctxFlag');
+const ctxCity=document.getElementById('ctxCity');
+const ctxInfo=document.getElementById('ctxInfo');
+const ctxCurrency=document.getElementById('ctxCurrency');
+const ctxTemp=document.getElementById('ctxTemp');
+
+// Observe city-arrive elements AND date-blocks with data-city
+const targets=document.querySelectorAll('.city-arrive[data-city],.date-block[data-city]');
+let current=null;
+
+const obs=new IntersectionObserver((entries)=>{
+entries.forEach(e=>{
+if(e.isIntersecting&&e.intersectionRatio>0){
+const el=e.target.closest('[data-cityname]')||e.target;
+const cn=el.dataset.cityname;
+if(cn&&cn!==current){
+current=cn;
+ctxFlag.textContent=el.dataset.flag||'';
+ctxCity.textContent=cn;
+ctxInfo.textContent=el.dataset.ctxinfo||'';
+ctxCurrency.textContent=el.dataset.currency||'';
+ctxTemp.textContent=el.dataset.temp||'';
+// Update date nav active
+updateDateNav(el);
+}}});
+},{rootMargin:'-100px 0px -60% 0px',threshold:0});
+
+targets.forEach(t=>obs.observe(t));
+
+function updateDateNav(el){
+const block=el.closest('.date-block');
+if(!block)return;
+const id=block.id;
+document.querySelectorAll('.date-pill').forEach(p=>{
+p.classList.remove('active');
+if(p.getAttribute('href')==='#'+id)p.classList.add('active');
+});
+}
+})();
+
+// ── SEARCH ──
+(function(){
+const inp=document.getElementById('searchInput');
+const drop=document.getElementById('searchDrop');
+if(!inp||!drop)return;
+let IDX=[];
+function norm(s){return s.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function buildIndex(){
+IDX=[];
+document.querySelectorAll('.city-arrive[data-city]').forEach(el=>{
+const h=el.querySelector('h3');
+IDX.push({title:h?h.textContent:'',ctx:el.querySelector('.ca-sub')?.textContent||'',cat:'\uD83C\uDFD9',search:norm((h?h.textContent:'')+' '+(el.querySelector('.ca-sub')?.textContent||'')),el:el});
+});
+document.querySelectorAll('.hl-card').forEach(el=>{
+const n=el.querySelector('.hl-name'),d=el.querySelector('.hl-desc');
+IDX.push({title:n?n.textContent:'',ctx:d?d.textContent.substring(0,50):'',cat:'\uD83D\uDCCD',search:norm((n?n.textContent:'')+(d?' '+d.textContent:'')),el:el});
+});
+document.querySelectorAll('.transfer-card').forEach(el=>{
+const t=el.querySelector('.tc-title');
+IDX.push({title:t?t.textContent:'',ctx:'Traslado',cat:'\uD83D\uDE86',search:norm(t?t.textContent:''),el:el});
+});
+document.querySelectorAll('.accom-card').forEach(el=>{
+const n=el.querySelector('.ac-name');
+IDX.push({title:n?n.textContent:'',ctx:'Alojamiento',cat:'\uD83C\uDFE0',search:norm(el.textContent),el:el});
+});
+document.querySelectorAll('.pend-item').forEach(el=>{
+const t=el.querySelector('.pend-title');
+IDX.push({title:t?t.textContent:'',ctx:'Pendiente',cat:'\uD83D\uDCCB',search:norm(el.textContent),el:el});
+});
+}
+setTimeout(buildIndex,500);
+
+inp.addEventListener('input',function(){
+const q=norm(this.value);
+if(q.length<2){drop.classList.remove('open');drop.innerHTML='';return}
+const results=IDX.map(e=>({...e,score:scoreEntry(e,q)})).filter(e=>e.score>0).sort((a,b)=>b.score-a.score).slice(0,8);
+if(!results.length){drop.classList.remove('open');return}
+drop.innerHTML=results.map(r=>'<div class="search-item" data-idx="1"><span class="search-item-cat">'+r.cat+'</span><div class="search-item-text"><div class="search-item-title">'+esc(r.title)+'</div><div class="search-item-ctx">'+esc(r.ctx)+'</div></div></div>').join('');
+drop.classList.add('open');
+drop.querySelectorAll('.search-item').forEach((item,i)=>{
+item.onclick=()=>{const r=results[i];if(r.el){r.el.scrollIntoView({behavior:'smooth',block:'center'});const card=r.el.closest('.act-card');if(card&&!card.classList.contains('open'))togAct(card)}drop.classList.remove('open');inp.value='';inp.blur()};
+});
+});
+inp.addEventListener('blur',()=>{setTimeout(()=>drop.classList.remove('open'),200)});
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='k'){e.preventDefault();inp.focus()}});
+
+function scoreEntry(e,q){const s=e.search;if(s.includes(q))return 80;const ws=q.split(/\s+/).filter(w=>w.length>1);const m=ws.filter(w=>s.includes(w)).length;return m>0?20+m*15:0}
+function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+})();
+
+// ── DAY BADGES ──
+(function(){
+const DAY_DATES={1:'2026-05-13',2:'2026-05-14',3:'2026-05-15',4:'2026-05-16',5:'2026-05-17',6:'2026-05-18',7:'2026-05-19',8:'2026-05-20',9:'2026-05-21',10:'2026-05-22',11:'2026-05-23',12:'2026-05-24',13:'2026-05-25',14:'2026-05-26',15:'2026-05-27',16:'2026-05-28',17:'2026-05-29',18:'2026-05-30',19:'2026-05-31',20:'2026-06-01',21:'2026-06-02',22:'2026-06-03'};
+const now=new Date(),ts=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+const tom=new Date(now);tom.setDate(tom.getDate()+1);
+const toms=tom.getFullYear()+'-'+String(tom.getMonth()+1).padStart(2,'0')+'-'+String(tom.getDate()).padStart(2,'0');
+for(const[num,ds]of Object.entries(DAY_DATES)){
+const el=document.getElementById('d'+num);if(!el)continue;
+const label=el.querySelector('.date-label');
+if(ds<ts){const pill=document.querySelector('.date-pill[data-day="'+num+'"]');if(pill)pill.classList.add('past')}
+else if(ds===ts){
+const b=document.createElement('span');b.className='dbadge dbadge-today';b.textContent='HOY';if(label)label.appendChild(b);
+const pill=document.querySelector('.date-pill[data-day="'+num+'"]');if(pill)pill.classList.add('active');
+const card=el.querySelector('.act-card');if(card&&!card.classList.contains('open'))togAct(card);
+setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center'}),500);
+}else if(ds===toms){
+const b=document.createElement('span');b.className='dbadge dbadge-tomorrow';b.textContent='MA\u00d1ANA';if(label)label.appendChild(b);
+}}
+})();
+
+// ── PENDING CHECKLIST WITH LOCALSTORAGE ──
+function togglePend(id){
+const el=document.querySelector('[data-pend="'+id+'"]');if(!el)return;
+const check=el.querySelector('.pend-check');
+const done=el.classList.toggle('done');
+check.classList.toggle('checked',done);
+let saved=JSON.parse(localStorage.getItem('pb_pend')||'{}');
+saved[id]=done;localStorage.setItem('pb_pend',JSON.stringify(saved));
+updatePendProgress();
+}
+function updatePendProgress(){
+const items=document.querySelectorAll('.pend-item');
+const done=document.querySelectorAll('.pend-item.done').length;
+const total=items.length;
+const fill=document.getElementById('pendFill');
+const counter=document.getElementById('pendCounter');
+if(fill)fill.style.width=(total?done/total*100:0)+'%';
+if(counter)counter.textContent=done+' de '+total+' completadas';
+}
+(function(){
+const saved=JSON.parse(localStorage.getItem('pb_pend')||'{}');
+for(const[id,done]of Object.entries(saved)){
+if(done){const el=document.querySelector('[data-pend="'+id+'"]');if(el){el.classList.add('done');const c=el.querySelector('.pend-check');if(c)c.classList.add('checked')}}
+}
+setTimeout(updatePendProgress,100);
+})();
+</script>
+
+</body>
+</html>
